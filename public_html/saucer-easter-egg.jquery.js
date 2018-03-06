@@ -11,13 +11,14 @@
 
         let saucerEasterEgg = {
             config: {
-                isFlying: false
+                isFlying: false,
+                LABEL: opts && opts.label || '- - - - - - - - I WANT TO BELIEVE - - - - - -'
 
             },
             /**
-             * constructor? todo make contstructuor
+             * constructor? todo make ES6 contstructuor
              * @param {object} $target 
-             * @param {type} saucerSel
+             * @param {type} $saucer the saucer jQuery object
              * @returns {undefined}
              */
             init: function ($target, $saucer) {
@@ -47,7 +48,6 @@
 
                 }
             },
-
             /**
              * get a strong selector for the saucer element, formerly had 
              * .selector
@@ -62,29 +62,46 @@
                 console.dir($saucer);
 
                 let idSaucer = $saucer.attr('id');
-                let classSaucer = $saucer.attr('class');
+                let classesSaucer = $saucer.attr('class').replace(/ /gi, '.');
                 if (!idSaucer) {
                     throw 'no id on saucer please add valid id to the saucer button to make strong selector';
                 }
-                if (!classSaucer) {
+                if (!classesSaucer) {
                     throw 'no class on saucer please add valid class to the saucer button to make strong selector';
                 }
 
-                return `#${idSaucer}.${classSaucer}`;
-            },
+                //need to make stronger, 
+                //go up 4 parents get the class if any and add to the selector if body hit, stop
+                let parentClasses = $saucer.parents()
+                        .map(function () {
+                            let $this = $(this);
+                            if (this.tagName !== 'BODY'
+                                    && this.tagName !== 'HTML'
+                                    && $this.attr('class')
+                                    ) {
+                                return this.tagName.toLowerCase() + '.' + $this.attr('class');
 
+                            }
+
+                        })
+                        .get()
+                        .reverse()
+                        .join(" ");
+
+
+                
+                let tagName = $saucer.get(0).tagName.toLowerCase();
+                let strongSaucerSelector = `${parentClasses} ${tagName}#${idSaucer}.${classesSaucer}`;
+                console.log('strongSaucerSElector:', strongSaucerSelector);
+                return strongSaucerSelector;
+            },
             /**
              * setup the styles for the page.
-             * @param {type} saucerEl element of the saucer
+             * @param {object} $saucer element of the saucer
              * @returns {undefined}
              */
             setupCss: function ($saucer) {
                 console.log('$saucer', $saucer);
-               // let $saucer = $(saucerEl);
-//                if (saucerEl instanceof jQuery) {
-//                    console.log('is a jquery selector');
-//                    $saucer = saucerEl;
-//                }
 
                 let saucerSelector = saucerEasterEgg.getStrongSaucerSelector($saucer);
 
@@ -95,14 +112,22 @@
 
                 const saucerCss = `
 
-                /* both b4 and 4f */
+                /* saucer shots stuffe */
                 html body ${saucerSelector}::before, 
                 html body ${saucerSelector}.shot::after{
                     color: transparent;
-                    content: " "; /* b4 and after need content */
+                    content: " ";
                     display: inline-block;
                 }
 
+                /* laser blast */
+                html body ${saucerSelector}.shot::after {
+                    background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%, rgba(255, 48, 25, 0.95) 51%, rgba(255, 186, 178, 1) 51%, rgba(255, 255, 255, 0.68) 54%, rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+                    border-radius: 12px; 
+                    margin-left: 52px;
+                    margin-top: 2px;
+                }
+                
                 /* top of saucer */
                 html body ${saucerSelector}::before {
                     background-color: #e9e9e9;
@@ -118,18 +143,8 @@
                     border-top: 1px solid rgb(208, 208, 208);
                 }
 
-                /* laser shot! which is a div w/ a bg t
-                 * hat looks like a laser!, toggled .shot */
-                html body ${saucerSelector}.shot::after {
 
-                    /* actual beam, a nifty bg gradient */
-                    background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%, rgba(255, 48, 25, 0.95) 51%, rgba(255, 186, 178, 1) 51%, rgba(255, 255, 255, 0.68) 54%, rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
-                    border-radius: 12px; 
-                    margin-left: 52px;
-                    margin-top: 2px;
-                }
-
-                /* main saucer */
+                /* flying saucer */
                 html body ${saucerSelector}{
                   /*transition: all 2s ease; */
                   min-width: 100px;
@@ -139,6 +154,7 @@
                   position: relative;
                 }
 
+                /* marquee w/ banner */
                 html body ${saucerSelector} marquee{
                     width: 100px;  
                 }
@@ -165,7 +181,7 @@
 
                 //todo make the saucer fly relative to target?
                 $saucer.attr('data-text-was', $saucer.text())
-                        .html('<marquee>- - - - - - - - I WANT TO BELIEVE - - - - - -</marquee>')
+                        .html('<marquee>' + saucerEasterEgg.config.LABEL + '</marquee>')
                         .animate({
                             left: hDir + "=" + Math.abs(hDist) / 2,
                             top: "-=" + top,
@@ -239,6 +255,9 @@
                 saucerEasterEgg.explodeTarget($target);
 
                 $saucer.addClass('shot');
+                
+                //---------xxxxxxxxxxxxxxxxxxxxxxxxxx----
+                return;
                 window.setTimeout(function () {
                     $saucer.removeClass('shot');
                     window.setTimeout(function () {
@@ -308,24 +327,24 @@
             }
 
         };
-       
-        return this.each(function() {
-                // Do something to each element here.
+
+        return this.each(function () {
+            // Do something to each element here.
             let $target = $(this);
             //let $saucer = $(opts.saucer);
 
             $target.click(function () {
                 let $saucer;
-                if(opts && opts.saucer){
+                if (opts && opts.saucer) {
                     //get from options like $('#id').flyingSaucerAttack({saucer: '#saucer-btn-right'});
                     $saucer = $(opts.saucer);
-                }else if($target.data('saucer')){
+                } else if ($target.data('saucer')) {
                     //get from data like :
                     //<span id="saucer-target" data-saucer="#saucer-btn">target click me to blow me up</span>
 
                     $saucer = $($target.data('saucer'));
-                }else{
-                    throw 'could not find saucer id in either options, or data.'
+                } else {
+                    throw 'could not find saucer id in either options, or data.';
                 }
                 console.log('id:', $saucer.attr('id'));
 
@@ -333,11 +352,11 @@
 
             });
         });
- 
+
 
         //todo refactor so it sends 2 jQuery elements. 
         //the $saucer, and $targets!
-       // saucerEasterEgg.init(e, $(this));
+        // saucerEasterEgg.init(e, $(this));
 
         return this;
     };
