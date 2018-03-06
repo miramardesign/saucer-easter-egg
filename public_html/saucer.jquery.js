@@ -1,18 +1,12 @@
 //this is es6 so not for older js engines.
 'use strict';
 
-//instantiation, can be moved to other file
-$('body').on("click", '#target', function (e) {
-    //$(saucerSelector) -> attacks element clicked on
-    console.log('click');
-    $('#saucer').flyingSaucerAttack(e);
-});
 
 (function ($) {
 
     $.fn.flyingSaucerAttack = function (e) {
 
-        var flyingSaucer = {
+        let flyingSaucer = {
             isFlying: false,
             /**
              * constructor? todo make contstructuor
@@ -21,12 +15,12 @@ $('body').on("click", '#target', function (e) {
              * @returns {undefined}
              */
             init: function (e, saucerSel) {
-                var $elToDestroy = $(e.currentTarget);
-                
-                if($elToDestroy.length === 0){
+                let $elToDestroy = $(e.currentTarget);
+
+                if ($elToDestroy.length === 0) {
                     throw  'couldnt find element to destroy, its selector was: ' + e.currentTarget;
                 }
-                if(!saucerSel || saucerSel.length === 0){
+                if (!saucerSel || saucerSel.length === 0) {
                     throw  'couldnt find saucer element to be destroyer its selector was: ' + saucerSel;
                 }
 
@@ -38,7 +32,7 @@ $('body').on("click", '#target', function (e) {
                 flyingSaucer.isFlying = true;
                 window.setTimeout(function () {
 
-                    flyingSaucer.initStyles(saucerSel);
+                    flyingSaucer.setupCss(saucerSel);
 
                     window.setTimeout(function () {
                         flyingSaucer.flyUp($elToDestroy, saucerSel);
@@ -47,52 +41,58 @@ $('body').on("click", '#target', function (e) {
 
             },
             /**
+             * sometimes the click event is inside the span. normalize by going up
+             * 
+             * @returns {object} the outermost object  to be selected
+             */
+            normalizeClickTarget() {},
+
+            /**
              * get a strong selector for the saucer element, formerly had 
              * .selector
              * @param {type} $saucer the jQuery collection
              * @returns  {string} the id class like '#id.class';
              */
-            getSaucerSelector($saucer){
-                var $saucer = $saucer.first();
-                var idSaucer = $saucer.attr('id');
-                var classSaucer = $saucer.attr('class');
-                if(! idSaucer){
+            getSaucerSelector($saucer) {
+                if ($saucer.first) {
+                    $saucer = $saucer.first();
+                }
+                console.log('saucer obj', $saucer);
+                console.dir($saucer);
+
+                let idSaucer = $saucer.attr('id');
+                let classSaucer = $saucer.attr('class');
+                if (!idSaucer) {
                     throw 'no id on saucer please add valid id to the saucer button to make strong selector';
                 }
-                if(! classSaucer){
+                if (!classSaucer) {
                     throw 'no class on saucer please add valid class to the saucer button to make strong selector';
                 }
-                
+
                 return `#${idSaucer}.${classSaucer}`;
             },
-            
+
             /**
              * setup the styles for the page.
              * @param {type} saucerEl element of the saucer
              * @returns {undefined}
              */
-            initStyles: function (saucerEl) {
-                
-                var $saucer;
-                if( saucerEl instanceof jQuery){
-                    console.log('is a jquery selector')
+            setupCss: function (saucerEl) {
+
+                let $saucer = $(saucerEl);
+                if (saucerEl instanceof jQuery) {
+                    console.log('is a jquery selector');
                     $saucer = saucerEl;
-                    
-                }else{
-                     $saucer = $(saucerEl);
                 }
 
-                
-                var saucerSel = flyingSaucer.getSaucerSelector($saucer);  // $saucer[0].selector;
-                
-                if(typeof saucerSel !== 'string'){
-                    console.dir(saucerSel);
-                    throw 'saucerSel not string is ' + ( typeof saucerSel );
+                let saucerSel = flyingSaucer.getSaucerSelector($saucer);  
+
+                if (typeof saucerSel !== 'string') {
+                    console.log(typeof saucerSel);
+                    throw 'saucerSel not string is listed above';
                 }
 
-                
-                //new es6 templates!
-                var saucerSetupStyle = `
+                let saucerCss = `
 
                 /* both b4 and 4f */
                 html body ${saucerSel}::before, 
@@ -144,14 +144,14 @@ $('body').on("click", '#target', function (e) {
                 }
                 `;
 
-                flyingSaucer.appendCss(saucerSetupStyle);
+                flyingSaucer.appendCss(saucerCss);
             },
 
             flyUp: function ($elToDestroy, $saucer) {
 
-                var saucerSel = flyingSaucer.getSaucerSelector($saucer);
+                let saucerSel = flyingSaucer.getSaucerSelector($saucer);
 
-               // var $saucer = $(saucerSel);
+                // let $saucer = $(saucerSel);
 
                 //todo make the saucer fly relative to target?
                 $saucer.attr('data-text-was', $saucer.text())
@@ -182,13 +182,11 @@ $('body').on("click", '#target', function (e) {
                         .delay(900)
                         .fadeOut('slow');
             },
-            calcShot: function (distToTarget, $saucer) {
+            calcShot: function (distToTarget, saucerSel) {
 
-                var origMarginLeft = -52;
-                var offset = 0;
-                var sizeCssShot = '';
-                var saucerSel = flyingSaucer.getSaucerSelector($saucer);
-                
+                let origMarginLeft = -52;
+                let offset = 0;
+                let sizeCssShot = '';
 
                 //if saucer is to the right of target (needs work)
                 if (distToTarget.hDist < 0) {
@@ -213,13 +211,13 @@ $('body').on("click", '#target', function (e) {
             shoot: function ($saucer, $elToDestroy, saucerSel) {
 
                 //get distance to target, pass it to css as width of after and shoot
-                var distToTarget = flyingSaucer.getDistToTarget($saucer, $elToDestroy);
+                let distToTarget = flyingSaucer.getDistToTarget($saucer, $elToDestroy);
 
                 flyingSaucer.calcShot(distToTarget, saucerSel);
                 flyingSaucer.explodeTarget($elToDestroy);
 
                 $saucer.addClass('shot');
-              return; //debug return to play w shot css
+                return; //debug return to play w shot css
                 window.setTimeout(function () {
                     $saucer.removeClass('shot');
                     window.setTimeout(function () {
@@ -237,10 +235,10 @@ $('body').on("click", '#target', function (e) {
                 console.dir($target.offset());
 
                 //todo return negative so that the saucer doesnt have to be on any side
-                var hDist = $target.offset().left - $saucer.offset().left;
+                let hDist = $target.offset().left - $saucer.offset().left;
 
                 //forcing to shoot downward 
-                var vDist = Math.abs($saucer.offset().top - $target.offset().top);
+                let vDist = Math.abs($saucer.offset().top - $target.offset().top);
 
                 return {
                     hDist: hDist,
@@ -252,11 +250,11 @@ $('body').on("click", '#target', function (e) {
             /* tried for a random dir here to give it some replayability */
             flyAway: function ($saucer) {
 
-                var rnd = Math.floor(Math.random() * 10);
-                var dir = rnd % 2 === 0 ? '+' : '-';
+                let rnd = Math.floor(Math.random() * 10);
+                let dir = rnd % 2 === 0 ? '+' : '-';
 
                 //like +=2000 or -=2000
-                var horiz = dir + "=2000";
+                let horiz = dir + "=2000";
 
                 $saucer.animate({
                     left: horiz,
@@ -271,9 +269,9 @@ $('body').on("click", '#target', function (e) {
 
         };
 
-        var $this = $(this);
+        let $this = $(this);
         console.log('this selector?', $this);
-        
+
         //todo refactor so it sends 2 jQuery elements. 
         //the $saucer, and $targets!
         flyingSaucer.init(e, $this);
@@ -286,9 +284,9 @@ $('body').on("click", '#target', function (e) {
 
 (function ($) {
 
-    $.fn.xplodeText = function (step) {
+    $.fn.xplodeText = function (step = 0) {
         //0 step resets
-        var $this = $(this);
+        let $this = $(this);
 
         //precheck cleanup, redesigned so if you call it twice on same text it
         //cleans up.
@@ -298,39 +296,37 @@ $('body').on("click", '#target', function (e) {
 
             $this.children('span').removeAttr('style');
             $('.xplode-text').remove();//styles head
-            //return this;
         }
 
-         console.log( '$("' + $this.selector + '").xplodeText(' + step + ')');
+        console.log('$("' + $this.selector + '").xplodeText(' + step + ')');
 
         $this.addClass('xplode').css('position', 'relative');
 
-        var thisTxt = jQuery.trim($this.text());
+        const thisTxt = jQuery.trim($this.text());
         $this.attr('text-was', thisTxt);
 
-        var thisHtm = '';
-        var len = thisTxt.length;
+        let htmlTmpl = '';
+        let len = thisTxt.length;
 
-        var r = len / 2;
+        let r = len / 2;
 
         //todo 1,loop 1 dom insert
-        for (var x = 0 - r; x < r; x++) {
+        for (let x = 0 - r; x < r; x++) {
 
             //semi circle eq: y = √(r² - x²) 
-            var y = Math.floor(Math.sqrt((r * r) - (x * x)));
+            let y = Math.floor(Math.sqrt((r * r) - (x * x)));
 
             //add step multiplier
             y = y * step;
-            var letI = x + r;
-            var thisLet = thisTxt[letI];
+            let letI = x + r;
+            let thisLet = thisTxt[letI];
 
-            thisHtm += '<span class="xplode' + letI + '" ' +
-                    ' style="position: relative; top: ' + y + 'px;" >'
-                    + thisLet
-                    + '</span>';
+            htmlTmpl += `<span class="xplode${letI}" 
+                        style="position: relative; top: ${y}px;" >
+                        ${thisLet}</span>`;
         }
 
-        $this.html(thisHtm);
+        $this.html(htmlTmpl);
 
         return this;
     };
