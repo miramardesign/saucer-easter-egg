@@ -15,9 +15,9 @@
              * @returns {undefined}
              */
             init: function (e, saucerSel) {
-                let $elToDestroy = $(e.currentTarget);
+                let $saucerTarget = $(e.currentTarget);
 
-                if ($elToDestroy.length === 0) {
+                if ($saucerTarget.length === 0) {
                     throw  'couldnt find element to destroy, its selector was: ' + e.currentTarget;
                 }
                 if (!saucerSel || saucerSel.length === 0) {
@@ -28,14 +28,14 @@
                     console.log('already flying?');
                     return;
                 }
-                flyingSaucer.cleanup();
+                flyingSaucer.clearPage();
                 flyingSaucer.isFlying = true;
                 window.setTimeout(function () {
 
                     flyingSaucer.setupCss(saucerSel);
 
                     window.setTimeout(function () {
-                        flyingSaucer.flyUp($elToDestroy, saucerSel);
+                        flyingSaucer.flyAbove($saucerTarget, saucerSel);
                     }, 500);
                 }, 500);
 
@@ -85,25 +85,25 @@
                     $saucer = saucerEl;
                 }
 
-                let saucerSel = flyingSaucer.getSaucerSelector($saucer);  
+                let saucerSelector = flyingSaucer.getSaucerSelector($saucer);
 
-                if (typeof saucerSel !== 'string') {
-                    console.log(typeof saucerSel);
+                if (typeof saucerSelector !== 'string') {
+                    console.log(typeof saucerSelector);
                     throw 'saucerSel not string is listed above';
                 }
 
-                let saucerCss = `
+                const saucerCss = `
 
                 /* both b4 and 4f */
-                html body ${saucerSel}::before, 
-                html body ${saucerSel}.shot::after{
+                html body ${saucerSelector}::before, 
+                html body ${saucerSelector}.shot::after{
                     color: transparent;
                     content: " "; /* b4 and after need content */
                     display: inline-block;
                 }
 
                 /* top of saucer */
-                html body ${saucerSel}::before {
+                html body ${saucerSelector}::before {
                     background-color: #e9e9e9;
                     border-radius: 6px;
                     height: 8px;
@@ -119,7 +119,7 @@
 
                 /* laser shot! which is a div w/ a bg t
                  * hat looks like a laser!, toggled .shot */
-                html body ${saucerSel}.shot::after {
+                html body ${saucerSelector}.shot::after {
 
                     /* actual beam, a nifty bg gradient */
                     background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%, rgba(255, 48, 25, 0.95) 51%, rgba(255, 186, 178, 1) 51%, rgba(255, 255, 255, 0.68) 54%, rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
@@ -130,7 +130,7 @@
                 }
 
                 /* main saucer */
-                html body ${saucerSel}{
+                html body ${saucerSelector}{
                   /*transition: all 2s ease; */
                   min-width: 100px;
                   max-width: 124px;
@@ -139,15 +139,15 @@
                   position: relative;
                 }
 
-                html body ${saucerSel} marquee{
+                html body ${saucerSelector} marquee{
                     width: 100px;  
                 }
                 `;
 
-                flyingSaucer.appendCss(saucerCss);
+                flyingSaucer.appendCssToPage(saucerCss);
             },
 
-            flyUp: function ($elToDestroy, $saucer) {
+            flyAbove: function ($elToDestroy, $saucer) {
 
                 let saucerSel = flyingSaucer.getSaucerSelector($saucer);
 
@@ -164,16 +164,31 @@
                             borderRadius: '+=20'
                         }, 3000, function () {
 
-                            flyingSaucer.shoot($saucer, $elToDestroy, saucerSel);
+                            flyingSaucer.shootSaucerTarget($saucer, $elToDestroy, saucerSel);
                         }).css('overflow', 'visible');
             },
-            appendCss: function (styles) {
-                $('<style class="appended-style flying-saucer" >' + styles + '</style>').appendTo('head');
+            /**
+             * append a style tag to page head, so it can be removed later.
+             * @param {type} css
+             * @returns {undefined}
+             */
+            appendCssToPage: function (css) {
+                $('<style class="appended-style flying-saucer" >' + css + '</style>').appendTo('head');
             },
-            cleanup: function () {
+            /**
+             * cleanup, need to make perfectly like was before
+             * @param {type} $saucer to cleanup the damn saucer
+             * @returns {undefined}
+             */
+            clearPage: function ($saucer) {
                 flyingSaucer.isFlying = false;
                 $('.appended-style').remove();
-                $('a, .kpi, a span, .kpi span').removeAttr('style');
+                //$('a, .kpi, a span, .kpi span').removeAttr('style'); 
+                if ($saucer) {
+                    $saucer.removeAttr('style');
+
+                }
+
                 $('a[data-text-was]').text($('a[data-text-was]').attr('data-text-was'));
             },
             explodeTarget: function ($elToDestroy) {
@@ -182,7 +197,7 @@
                         .delay(900)
                         .fadeOut('slow');
             },
-            calcShot: function (distToTarget, saucerSel) {
+            makeShot: function (distToTarget, saucerSel) {
 
                 let origMarginLeft = -52;
                 let offset = 0;
@@ -206,18 +221,25 @@
                         height: ${distToTarget.vDist }px;
                     }`;
 
-                flyingSaucer.appendCss(sizeCssShot);
+                flyingSaucer.appendCssToPage(sizeCssShot);
             },
-            shoot: function ($saucer, $elToDestroy, saucerSel) {
+            /**
+             * blow it up from orbit
+             * @param {type} $saucer
+             * @param {type} $elToDestroy
+             * @param {type} saucerSel
+             * @returns {undefined}
+             */
+            shootSaucerTarget: function ($saucer, $elToDestroy, saucerSel) {
 
                 //get distance to target, pass it to css as width of after and shoot
                 let distToTarget = flyingSaucer.getDistToTarget($saucer, $elToDestroy);
 
-                flyingSaucer.calcShot(distToTarget, saucerSel);
+                flyingSaucer.makeShot(distToTarget, saucerSel);
                 flyingSaucer.explodeTarget($elToDestroy);
 
                 $saucer.addClass('shot');
-                return; //debug return to play w shot css
+                //return; //debug return to play w shot css
                 window.setTimeout(function () {
                     $saucer.removeClass('shot');
                     window.setTimeout(function () {
@@ -227,12 +249,18 @@
                 }, 1000);
 
             },
+            /**
+             * get a distance object to caculate the shot
+             * @param {type} $saucer
+             * @param {type} $target
+             * @returns {saucer.jqueryL#5.$.fn.flyingSaucerAttack.flyingSaucer.getDistToTarget.saucer.jqueryAnonym$1}
+             */
             getDistToTarget: function ($saucer, $target) {
 
-                console.log('saucer details');
-                console.dir($saucer.offset());
-                console.log('target details');
-                console.dir($target.offset());
+//                console.log('saucer details');
+//                console.dir($saucer.offset());
+//                console.log('target details');
+//                console.dir($target.offset());
 
                 //todo return negative so that the saucer doesnt have to be on any side
                 let hDist = $target.offset().left - $saucer.offset().left;
@@ -260,7 +288,7 @@
                     left: horiz,
                     top: dir + '=' + (rnd * 200)}, 6000, function () {
 
-                    flyingSaucer.cleanup();
+                    flyingSaucer.clearPage($saucer);
 
                 });
 
@@ -284,6 +312,11 @@
 
 (function ($) {
 
+    /**
+     * makes the text turn red and go in a circle like it was exploded.
+     * @param {type} step
+     * @returns {saucer.jqueryL#285.$.fn}
+     */
     $.fn.xplodeText = function (step = 0) {
         //0 step resets
         let $this = $(this);
@@ -302,11 +335,11 @@
 
         $this.addClass('xplode').css('position', 'relative');
 
-        const thisTxt = jQuery.trim($this.text());
-        $this.attr('text-was', thisTxt);
+        const text = jQuery.trim($this.text());
+        $this.attr('text-was', text);
 
         let htmlTmpl = '';
-        let len = thisTxt.length;
+        let len = text.length;
 
         let r = len / 2;
 
@@ -319,11 +352,11 @@
             //add step multiplier
             y = y * step;
             let letI = x + r;
-            let thisLet = thisTxt[letI];
+            let letter = text[letI];
 
             htmlTmpl += `<span class="xplode${letI}" 
                         style="position: relative; top: ${y}px;" >
-                        ${thisLet}</span>`;
+                        ${letter}</span>`;
         }
 
         $this.html(htmlTmpl);
