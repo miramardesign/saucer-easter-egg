@@ -2,9 +2,14 @@
 
 (function ($) {
 
+    /**
+     * flying saucer easter egg jQuery plugin.
+     * @param {type} e
+     * @returns {saucer.jqueryL#3.$.fn}
+     */
     $.fn.flyingSaucerAttack = function (e) {
 
-        let flyingSaucer = {
+        let saucerEasterEgg = {
             isFlying: false,
             /**
              * constructor? todo make contstructuor
@@ -22,29 +27,23 @@
                     throw  'couldnt find saucer element to be destroyer its selector was: ' + saucerSel;
                 }
 
-                if (flyingSaucer.isFlying) {
+                if (saucerEasterEgg.isFlying) {
                     console.log('already flying?');
                     return;
                 }
-                flyingSaucer.clearPage();
-                flyingSaucer.isFlying = true;
+                saucerEasterEgg.clearPage();
+                saucerEasterEgg.isFlying = true;
                 window.setTimeout(function () {
 
-                    flyingSaucer.setupCss(saucerSel);
+                    saucerEasterEgg.setupCss(saucerSel);
 
                     window.setTimeout(function () {
-                        flyingSaucer.flyAbove($saucerTarget, saucerSel);
+                        saucerEasterEgg.flyAbove($saucerTarget, saucerSel);
                     }, 500);
                 }, 500);
 
             },
-            /**
-             * sometimes the click event is inside the span. normalize by going up
-             * 
-             * @returns {object} the outermost object  to be selected
-             */
-            normalizeClickTarget() {},
-
+          
             /**
              * get a strong selector for the saucer element, formerly had 
              * .selector
@@ -83,7 +82,7 @@
                     $saucer = saucerEl;
                 }
 
-                let saucerSelector = flyingSaucer.getSaucerSelector($saucer);
+                let saucerSelector = saucerEasterEgg.getSaucerSelector($saucer);
 
                 if (typeof saucerSelector !== 'string') {
                     console.log(typeof saucerSelector);
@@ -141,12 +140,12 @@
                 }
                 `;
 
-                flyingSaucer.appendCssToPage(saucerCss);
+                saucerEasterEgg.appendCssToPage(saucerCss);
             },
 
             flyAbove: function ($elToDestroy, $saucer) {
 
-                let saucerSel = flyingSaucer.getSaucerSelector($saucer);
+                let saucerSel = saucerEasterEgg.getSaucerSelector($saucer);
 
                 // let $saucer = $(saucerSel);
 
@@ -161,7 +160,7 @@
                             borderRadius: '+=20'
                         }, 3000, function () {
 
-                            flyingSaucer.shootSaucerTarget($saucer, $elToDestroy, saucerSel);
+                            saucerEasterEgg.shootSaucerTarget($saucer, $elToDestroy, saucerSel);
                         }).css('overflow', 'visible');
             },
             /**
@@ -172,21 +171,6 @@
             appendCssToPage: function (css) {
                 $('<style class="appended-style flying-saucer" >' + css + '</style>').appendTo('head');
             },
-            /**
-             * cleanup, need to make perfectly like was before
-             * @param {type} $saucer to cleanup the damn saucer
-             * @returns {undefined}
-             */
-            clearPage: function ($saucer) {
-                flyingSaucer.isFlying = false;
-                $('.appended-style').remove();
-                if (!$saucer) {
-                    return;
-                }
-
-                $saucer.removeAttr('style');
-                $saucer.text($saucer.attr('data-text-was'));
-            },
             explodeTarget: function ($elToDestroy) {
                 $elToDestroy.css('color', 'red')
                         .xplodeText(2)
@@ -195,7 +179,7 @@
             },
             makeShot: function (distToTarget, saucerSel) {
 
-                let origMarginLeft = -52;
+                const origMarginLeft = -52;
                 let offset = 0;
                 let sizeCssShot = '';
 
@@ -204,7 +188,7 @@
                     offset = origMarginLeft;
                     sizeCssShot += `
                     html body ${saucerSel}.shot::after{ 
-                        margin-left: ${(-52 + distToTarget.hDist)}px;
+                        margin-left: ${(origMarginLeft + distToTarget.hDist)}px;
                         transform: scaleY(-1);
                     }`;
 
@@ -217,29 +201,28 @@
                         height: ${distToTarget.vDist }px;
                     }`;
 
-                flyingSaucer.appendCssToPage(sizeCssShot);
+                saucerEasterEgg.appendCssToPage(sizeCssShot);
             },
             /**
              * blow it up from orbit
              * @param {type} $saucer
-             * @param {type} $elToDestroy
+             * @param {type} $target
              * @param {type} saucerSel
              * @returns {undefined}
              */
-            shootSaucerTarget: function ($saucer, $elToDestroy, saucerSel) {
+            shootSaucerTarget: function ($saucer, $target, saucerSel) {
 
                 //get distance to target, pass it to css as width of after and shoot
-                let distToTarget = flyingSaucer.getDistToTarget($saucer, $elToDestroy);
+                let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
 
-                flyingSaucer.makeShot(distToTarget, saucerSel);
-                flyingSaucer.explodeTarget($elToDestroy);
+                saucerEasterEgg.makeShot(distToTarget, saucerSel);
+                saucerEasterEgg.explodeTarget($target);
 
                 $saucer.addClass('shot');
-                //return; //debug return to play w shot css
                 window.setTimeout(function () {
                     $saucer.removeClass('shot');
                     window.setTimeout(function () {
-                        flyingSaucer.flyAway($saucer);
+                        saucerEasterEgg.flyAway($saucer, $target);
                     }, 500);
 
                 }, 1000);
@@ -253,11 +236,6 @@
              */
             getDistToTarget: function ($saucer, $target) {
 
-//                console.log('saucer details');
-//                console.dir($saucer.offset());
-//                console.log('target details');
-//                console.dir($target.offset());
-
                 //todo return negative so that the saucer doesnt have to be on any side
                 let hDist = $target.offset().left - $saucer.offset().left;
 
@@ -270,36 +248,47 @@
                 };
 
             },
-
             /* tried for a random dir here to give it some replayability */
-            flyAway: function ($saucer) {
+            flyAway: function ($saucer, $target) {
 
-                let rnd = Math.floor(Math.random() * 10);
-                let dir = rnd % 2 === 0 ? '+' : '-';
+                let rand = Math.floor(Math.random() * 10);
+                let leftOrRightRandom = rand % 2 === 0 ? '+' : '-';
 
-                //like +=2000 or -=2000
-                let horiz = dir + "=2000";
+                let leftD = leftOrRightRandom + "=2000";
 
                 $saucer.animate({
-                    left: horiz,
-                    top: dir + '=' + (rnd * 200)}, 6000, function () {
+                    left: leftD,
+                    top: leftOrRightRandom + '=' + (rand * 200)}, 6000, function () {
 
-                    flyingSaucer.clearPage($saucer);
+                    saucerEasterEgg.clearPage($saucer, $target);
 
                 });
 
-                //calls shoot calls -> flyway etc
+            },  /**
+             * cleanup, need to make perfectly like was before
+             * @param {type} $saucer to cleanup the damn saucer
+             * @param {type} $target
+             * @returns {undefined}
+             */
+            clearPage: function ($saucer, $target) {
+                saucerEasterEgg.isFlying = false;
+                $('.appended-style').remove();
+                if (!$saucer) {
+                    return;
+                }
+
+                $saucer.removeAttr('style');
+                $saucer.text($saucer.attr('data-text-was'));
+                
+                $target.html($target.attr('data-text-was')).removeAttr('style');
+                $target.xplodeText(0);
             }
 
         };
 
-        let $this = $(this);
-        console.log('this selector?', $this);
-
         //todo refactor so it sends 2 jQuery elements. 
         //the $saucer, and $targets!
-        flyingSaucer.init(e, $this);
-        //flyingSaucer.init(e, $this.selector);
+        saucerEasterEgg.init(e,  $(this));
 
         return this;
     };
@@ -310,29 +299,37 @@
 
     /**
      * makes the text turn red and go in a circle like it was exploded.
-     * @param {type} step
+     * @param {type} stepDist whether to cleanup.
      * @returns {saucer.jqueryL#285.$.fn}
      */
-    $.fn.xplodeText = function (step = 0) {
+    $.fn.xplodeText = function (stepDist) {
         //0 step resets
         let $this = $(this);
-
-        //precheck cleanup, redesigned so if you call it twice on same text it
-        //cleans up.
-        if ($this.hasClass('xplode')) {
+        /**
+         * reset text
+         * @param {type} $this
+         * @returns {undefined}
+         */
+        function cleanupExplodText($this){
             $this.removeClass('xplode');
-            $this.html($this.attr('text-was'));
+            $this.html($this.attr('data-text-was'));
 
-            $this.children('span').removeAttr('style');
-            $('.xplode-text').remove();//styles head
+            $this.removeAttr('style');
+            $('.xplode-text').remove();
+            return;
+            
         }
 
-        console.log('$("' + $this.selector + '").xplodeText(' + step + ')');
+        if ($this.hasClass('xplode') && stepDist === 0) {
+            return cleanupExplodText($this);
+        }
+        
+        
 
         $this.addClass('xplode').css('position', 'relative');
 
         const text = jQuery.trim($this.text());
-        $this.attr('text-was', text);
+        $this.attr('data-text-was', text);
 
         let htmlTmpl = '';
         let len = text.length;
@@ -346,11 +343,11 @@
             let y = Math.floor(Math.sqrt((r * r) - (x * x)));
 
             //add step multiplier
-            y = y * step;
+            y = y * stepDist;
             let letI = x + r;
             let letter = text[letI];
 
-            htmlTmpl += `<span class="xplode${letI}" 
+            htmlTmpl += `<span class="xplode${letI} xplode-text" 
                         style="position: relative; top: ${y}px;" >
                         ${letter}</span>`;
         }
