@@ -1,6 +1,4 @@
-//this is es6 so not for older js engines.
 'use strict';
-
 
 (function ($) {
 
@@ -124,7 +122,6 @@
                     /* actual beam, a nifty bg gradient */
                     background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%, rgba(255, 48, 25, 0.95) 51%, rgba(255, 186, 178, 1) 51%, rgba(255, 255, 255, 0.68) 54%, rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
                     border-radius: 12px; 
-                    /* to make the corner look more real */
                     margin-left: 52px;
                     margin-top: 2px;
                 }
@@ -183,13 +180,12 @@
             clearPage: function ($saucer) {
                 flyingSaucer.isFlying = false;
                 $('.appended-style').remove();
-                //$('a, .kpi, a span, .kpi span').removeAttr('style'); 
-                if ($saucer) {
-                    $saucer.removeAttr('style');
-
+                if (!$saucer) {
+                    return;
                 }
 
-                $('a[data-text-was]').text($('a[data-text-was]').attr('data-text-was'));
+                $saucer.removeAttr('style');
+                $saucer.text($saucer.attr('data-text-was'));
             },
             explodeTarget: function ($elToDestroy) {
                 $elToDestroy.css('color', 'red')
