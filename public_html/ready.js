@@ -2,11 +2,12 @@
  * this file calls the saucer plugin on jQuery ready. 
  * @type type
  */
-$(document).ready(function(){
+$(document).ready(function () {
 
 // with data attibute data-saucer="#saucer-btn" in html
-$('#saucer-target').flyingSaucerAttack();
-        $('#saucer-target-right').flyingSaucerAttack({saucer: '#saucer-btn-right',
+    $('#saucer-target').flyingSaucerAttack();
+
+    $('#saucer-target-right').flyingSaucerAttack({saucer: '#saucer-btn-right',
         label: '- - - - get rekt!!!:) - - - -',
         stepDist: 4,
         blownColor: '#00F',
@@ -6064,5 +6065,5 @@ AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAABDRGlmRAAAAEQAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA`
 
+    });
 });
-        });
