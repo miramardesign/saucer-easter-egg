@@ -9,12 +9,11 @@
      */
     $.fn.flyingSaucerAttack = function (opts) {
 
-        let saucerEasterEgg = {
-            config: {
-                isFlying: false,
-                LABEL: opts && opts.label || '- - - - - - - - I WANT TO BELIEVE - - - - - -'
+        var settings = $.extend({
+            LABEL: '- - - - - - - - I WANT TO BELIEVE - - - - - - -'
+        }, opts);
 
-            },
+        let saucerEasterEgg = {
             /**
              * constructor? todo make ES6 contstructuor
              * @param {object} $target 
@@ -22,7 +21,7 @@
              * @returns {undefined}
              */
             init: function ($target, $saucer) {
-                if (saucerEasterEgg.config.isFlying) {
+                if ($target.data('isFlying')) {
                     console.log('already flying?');
                     return;
                 } else {
@@ -35,8 +34,9 @@
                         throw  'couldnt find $saucer saucer element to be destroyer its selector was: ';
                     }
 
-                    saucerEasterEgg.clearPage();
-                    saucerEasterEgg.config.isFlying = true;
+                    //saucerEasterEgg.clearPage();
+
+                    $target.data('isFlying', true);
                     window.setTimeout(function () {
 
                         saucerEasterEgg.setupCss($saucer);
@@ -88,8 +88,6 @@
                         .reverse()
                         .join(" ");
 
-
-                
                 let tagName = $saucer.get(0).tagName.toLowerCase();
                 let strongSaucerSelector = `${parentClasses} ${tagName}#${idSaucer}.${classesSaucer}`;
                 console.log('strongSaucerSElector:', strongSaucerSelector);
@@ -163,13 +161,11 @@
                 saucerEasterEgg.appendCssToPage(saucerCss);
             },
             /**
-             * try to keep the saucer inside the page as opposed to going out the top
+             * start flying  up
+             * @param {type} $target
+             * @param {type} $saucer
              * @returns {undefined}
              */
-            getDistToCieling: function () {
-
-            },
-
             flyAbove: function ($target, $saucer) {
 
                 let saucerSel = saucerEasterEgg.getStrongSaucerSelector($saucer);
@@ -181,7 +177,7 @@
 
                 //todo make the saucer fly relative to target?
                 $saucer.attr('data-text-was', $saucer.text())
-                        .html('<marquee>' + saucerEasterEgg.config.LABEL + '</marquee>')
+                        .html('<marquee>' + settings.LABEL + '</marquee>')
                         .animate({
                             left: hDir + "=" + Math.abs(hDist) / 2,
                             top: "-=" + top,
@@ -255,9 +251,9 @@
                 saucerEasterEgg.explodeTarget($target);
 
                 $saucer.addClass('shot');
-                
+
                 //---------xxxxxxxxxxxxxxxxxxxxxxxxxx----
-                return;
+                // return; //debug stop point
                 window.setTimeout(function () {
                     $saucer.removeClass('shot');
                     window.setTimeout(function () {
@@ -313,7 +309,6 @@
              * @returns {undefined}
              */
             clearPage: function ($saucer, $target) {
-                saucerEasterEgg.config.isFlying = false;
                 $('.appended-style').remove();
                 if (!$saucer) {
                     return;
@@ -324,6 +319,8 @@
 
                 $target.html($target.attr('data-text-was')).removeAttr('style');
                 $target.xplodeText(0);
+
+                $target.data('isFlying', false);
             }
 
         };
