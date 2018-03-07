@@ -1,5 +1,5 @@
 'use strict';
-(function ($, Math) {
+(function ($, Math, window) {
 
     /**
      * flying saucer easter egg jQuery plugin.
@@ -8,14 +8,8 @@
      */
     $.fn.flyingSaucerAttack = function (opts) {
 
-        var settings = $.extend({
-            blownColor: '#f10',
-            stepDist: 2,
-            LABEL: '- - - - - - - - I WANT T0 BEL1EVE - - - - - - -',
-            SPEED: 3000,
-            SND: "data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU="
-        }, opts);
-        
+        var settings;
+
         /**
          * main object
          * @type type
@@ -24,7 +18,7 @@
             /**
              * constructor? todo make ES6 contstructuor
              * @param {object} $target 
-             * @param {type} $saucer the saucer jQuery object
+             * @param {object} $saucer the jquery element for the saucer the saucer jQuery object
              * @returns {undefined}
              */
             init: function ($target, $saucer) {
@@ -58,7 +52,7 @@
             /**
              * get a strong selector for the saucer element, formerly had 
              * .selector
-             * @param {type} $saucer the jQuery collection
+             * @param {object} $saucer the jquery element for the saucer the jQuery collection
              * @returns  {string} the id class like '#id.class';
              */
             getStrongSaucerSelector($saucer) {
@@ -89,7 +83,7 @@
                         .get()
                         .reverse()
                         .join(" ");
-                
+
                 let tagName = $saucer.get(0).tagName.toLowerCase();
                 let strongSaucerSelector = `${parentClasses} ${tagName}#${idSaucer}.${classesSaucer}`;
                 console.log('strongSaucerSElector:', strongSaucerSelector);
@@ -104,20 +98,25 @@
             setupCss: function ($saucer, cssClass) {
                 console.log('$saucer', $saucer);
                 let strongSaucerSelector = saucerEasterEgg.getStrongSaucerSelector($saucer);
-      
+
                 const saucerCss = `
 
-                /* saucer shots stuffe */
+                /* saucer lasers stuffe */
                 ${strongSaucerSelector}::before, 
-                ${strongSaucerSelector}.shot::after{
+                ${strongSaucerSelector}.laser::after{
                     color: transparent;
                     content: " ";
                     display: inline-block;
                 }
 
                 /* laser blast */
-                ${strongSaucerSelector}.shot::after {
-                    background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%, rgba(255, 48, 25, 0.95) 51%, rgba(255, 186, 178, 1) 51%, rgba(255, 255, 255, 0.68) 54%, rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+                ${strongSaucerSelector}.laser::after {
+                    background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, 
+                        rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%,
+                        rgba(255, 48, 25, 0.95) 51%, 
+                        rgba(255, 186, 178, 1) 51%, 
+                        rgba(255, 255, 255, 0.68) 54%,
+                        rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
                     border-radius: 12px; 
                     margin-left: 52px;
                     margin-top: 2px;
@@ -165,8 +164,9 @@
             },
             /**
              * start flying  up
-             * @param {type} $target
-             * @param {type} $saucer
+             * @param {object} $target the jQuery element for the target text
+             * @param {object} $saucer the jquery element for the saucer
+             * @param {string} cssClass the class to add to the stylesheet for cleanup
              * @returns {undefined}
              */
             flyAbove: function ($target, $saucer, cssClass) {
@@ -205,7 +205,7 @@
             },
             /**
              * blow it up like the mythbusters, using plugin.
-             * @param {type} $target
+             * @param {object} $target the jQuery element for the target text
              * @returns {undefined}
              */
             blowUpTarget: function ($target) {
@@ -217,15 +217,15 @@
             },
             /**
              * make the text blow up in a circle
-             * @param {type} stepDist
-             * @param {type} $target
+             * @param {type} stepDist the distance the text should spread
+             * @param {object} $target the jQuery element for the target text
              * todo return es6 promises?
              * @returns {undefined}
              */
             blowupText: function (stepDist, $target) {
                 /**
                  * reset text
-                 * @param {type} $target
+                 * @param {object} $target the jQuery element for the target text
                  * @returns {undefined}
                  */
                 function cleanupBlownText($target) {
@@ -266,7 +266,7 @@
                 // return this;  return a promise?
             },
             /**
-             * shot w/ the laser css 
+             * laser w/ the laser css 
              * @param {object} distToTarget
              * @param {string} saucerSel
              * @param {string} cssClass
@@ -282,7 +282,7 @@
                 if (distToTarget.hDist < 0) {
                     offset = origMarginLeft;
                     sizeCssShot += `
-                    ${saucerSel}.shot::after{ 
+                    ${saucerSel}.laser::after{ 
                         margin-left: ${(origMarginLeft + distToTarget.hDist)}px;
                         transform: scaleY(-1);
                     }`;
@@ -290,7 +290,7 @@
                 }
 
                 sizeCssShot += `
-                    ${saucerSel}.shot::after{ 
+                    ${saucerSel}.laser::after{ 
                         width: ${(distToTarget.hDist + offset)}px;
                         height: ${distToTarget.vDist }px;
                     }`;
@@ -306,8 +306,8 @@
             },
             /**
              * blow it up from orbit
-             * @param {type} $saucer
-             * @param {type} $target
+             * @param {object} $saucer the jquery element for the saucer
+             * @param {object} $target the jQuery element for the target text
              * @param {string} saucerSel
              * @param {string} cssClass the class to removve
              * @returns {undefined}
@@ -318,22 +318,22 @@
                 let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
                 saucerEasterEgg.makeShot(distToTarget, saucerSel, cssClass);
                 saucerEasterEgg.blowUpTarget($target);
-                $saucer.addClass('shot');
+                $saucer.addClass('laser');
                 //---------xxxxxxxxxxxxxxxxxxxxxxxxxx----
                 // return; //debug stop point
                 window.setTimeout(function () {
-                    $saucer.removeClass('shot');
+                    $saucer.removeClass('laser');
                     window.setTimeout(function () {
                         saucerEasterEgg.flyAway($saucer, $target);
                     }, 500);
                 }, 1000);
             },
             /**
-             * get a distance object to caculate the shot divs,
+             * get a distance object to caculate the laser divs,
              * height and width, also gets didstance to top so i can avoid going offscreen
              * top
-             * @param {type} $saucer
-             * @param {type} $target
+             * @param {object} $saucer the jquery element for the saucer
+             * @param {object} $target the jQuery element for the target text
              * @returns {saucer.jqueryL#5.$.fn.flyingSaucerAttack.flyingSaucer.getDistToTarget.saucer.jqueryAnonym$1}
              */
             getDistToTarget: function ($saucer, $target) {
@@ -353,8 +353,8 @@
             /**
              * flys away semi randomly 
              * then calls 
-             * @param {type} $saucer
-             * @param {type} $target
+             * @param {object} $saucer the jquery element for the saucer
+             * @param {object} $target the jQuery element for the target text
              * @returns {undefined}
              */
             flyAway: function ($saucer, $target) {
@@ -371,8 +371,8 @@
             },
             /**
              * cleanup, need to make perfectly like was before
-             * @param {type} $saucer to cleanup the damn saucer
-             * @param {type} $target
+             * @param {object} $saucer the jquery element for the saucer to cleanup the damn saucer
+             * @param {object} $target the jQuery element for the target text
              * @returns {undefined}
              */
             clearPage: function ($saucer, $target) {
@@ -398,23 +398,29 @@
          * invoke on each jQuery matched set
          */
         return this.each(function () {
-            // Do something to each element here.
+
             let $target = $(this);
-            //let $saucer = $(opts.saucer);
+            
+            /**
+             * get opts from data attributes if not passed in.
+             * should all work.
+             */
+            if (!opts) {
+                opts = $target.data();
+            }
+            
+            settings = $.extend({
+                blownColor: '#f10',
+                stepDist: 2,
+                LABEL: '- - - - - - - - I WANT T0 BEL1EVE - - - - - - -',
+                SPEED: 3000,
+                SND: "data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU="
+            }, opts);
+
+            // Do something to each element here.
+            let $saucer = $(opts.saucer);
 
             $target.click(function () {
-                let $saucer;
-                if (opts && opts.saucer) {
-                    //get from options like $('#id').flyingSaucerAttack({saucer: '#saucer-btn-right'});
-                    $saucer = $(opts.saucer);
-                } else if ($target.data('saucer')) {
-                    //get from data like :
-                    //<span id="saucer-target" data-saucer="#saucer-btn">target click me to blow me up</span>
-
-                    $saucer = $($target.data('saucer'));
-                } else {
-                    throw 'could not find saucer id in either options, or data.';
-                }
                 console.log('id:', $saucer.attr('id'));
                 saucerEasterEgg.init($target, $saucer);
             });
@@ -422,5 +428,5 @@
 
         return this;
     };
-}(jQuery, Math));
+}(jQuery, Math, window));
 
