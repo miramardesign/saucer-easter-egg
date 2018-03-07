@@ -1,5 +1,5 @@
 'use strict';
-(function ($) {
+(function ($, Math) {
 
     /**
      * flying saucer easter egg jQuery plugin.
@@ -151,7 +151,14 @@
                 /* marquee w/ banner */
                 html body ${saucerSelector} marquee{
                     width: 100px;  
-                }`;
+                }
+                
+                .blown-text{
+                    position: relative;
+                }
+
+
+                `;
 
                 saucerEasterEgg.appendCssToPage(saucerCss, cssId);
             },
@@ -188,20 +195,78 @@
              * @returns {undefined}
              */
             appendCssToPage: function (css, cssId) {
-                $('<style class="appended-style flying-saucer" >' + css + '</style>')
-                        .appendTo('head').attr('id', cssId);
+                $(`<style class="appended-style flying-saucer" > ${css}</style>`)
+                        .appendTo('head')
+                        .attr('id', cssId);
             },
             /**
              * blow it up like the mythbusters, using plugin.
              * @param {type} $target
              * @returns {undefined}
              */
-            explodeTarget: function ($target) {
-                $target.css('color', 'red')
-                        .xplodeText(2)
+            blowUpTarget: function ($target) {
+                $target.css('color', '#f10')
+                        //.xplodeText(2)
                         .delay(900)
                         .fadeOut('slow');
+                
+                saucerEasterEgg.blowupText(2, $target);
             },
+            /**
+             * make the text blow up in a circle
+             * @param {type} stepDist
+             * @param {type} $target
+             * todo return es6 promises?
+             * @returns {undefined}
+             */
+            blowupText: function(stepDist, $target) {
+                //let $this = $(this);
+                /**
+                 * reset text
+                 * @param {type} $target
+                 * @returns {undefined}
+                 */
+                function cleanupBlownText($target) {
+                    $target.removeClass('blown-wrap');
+                    $target.html($target.attr('data-text-was'));
+                    $target.removeAttr('style');
+                    $('.blown-text').remove();
+                    return;
+                }
+
+                if ($target.hasClass('blown-wrap') && stepDist === 0) {
+                    return cleanupBlownText($target);
+                }
+
+
+                $target.addClass('blown-wrap')
+                //moved to css
+                        //.css('position', 'relative');
+                
+                
+                const text = $.trim($target.text());
+                $target.attr('data-text-was', text);
+                let htmlTmpl = '';
+                let len = text.length;
+                let r = len / 2;
+                //todo 1,loop 1 dom insert
+                for (let x = 0 - r; x < r; x++) {
+
+                    //semi circle eq: y = √(r² - x²) 
+                    let y = Math.floor(Math.sqrt((r * r) - (x * x)));
+                    //add step multiplier
+                    y = y * stepDist;
+                    let letI = x + r;
+                    let letter = text[letI];
+                    htmlTmpl += `<span class="blown${letI} blown-text" 
+                        style="position: relative; top: ${y}px;" >
+                        ${letter}</span>`;
+                }
+
+                $target.html(htmlTmpl);
+                // return this;  return a promise?
+            },
+
             /**
              * shot w/ the laser css 
              * @param {type} distToTarget
@@ -252,7 +317,7 @@
                 //get distance to target, pass it to css as width of after and shoot
                 let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
                 saucerEasterEgg.makeShot(distToTarget, saucerSel);
-                saucerEasterEgg.explodeTarget($target);
+                saucerEasterEgg.blowUpTarget($target);
                 $saucer.addClass('shot');
                 //---------xxxxxxxxxxxxxxxxxxxxxxxxxx----
                 // return; //debug stop point
@@ -322,10 +387,17 @@
                 $saucer.removeAttr('style');
                 $saucer.text($saucer.attr('data-text-was'));
                 $target.html($target.attr('data-text-was')).removeAttr('style');
-                $target.xplodeText(0);
+                
+                //$target.xplodeText(0);
+                saucerEasterEgg.blowupText(0, $target);
+                
                 $target.data('isFlying', false);
             }
         };
+
+        /**
+         * invoke on each jQuery matched set
+         */
         return this.each(function () {
             // Do something to each element here.
             let $target = $(this);
@@ -351,57 +423,59 @@
 
         return this;
     };
-}(jQuery));
-(function ($) {
+}(jQuery, Math));
 
-    /**
-     * makes the text turn red and go in a circle like it was exploded.
-     * @param {type} stepDist whether to cleanup.
-     * @returns {saucer.jqueryL#285.$.fn}
-     */
-    $.fn.xplodeText = function (stepDist) {
-        //0 step resets
-        let $this = $(this);
-        /**
-         * reset text
-         * @param {type} $this
-         * @returns {undefined}
-         */
-        function cleanupExplodText($this) {
-            $this.removeClass('xplode');
-            $this.html($this.attr('data-text-was'));
-            $this.removeAttr('style');
-            $('.xplode-text').remove();
-            return;
-        }
-
-        if ($this.hasClass('xplode') && stepDist === 0) {
-            return cleanupExplodText($this);
-        }
-
-
-
-        $this.addClass('xplode').css('position', 'relative');
-        const text = jQuery.trim($this.text());
-        $this.attr('data-text-was', text);
-        let htmlTmpl = '';
-        let len = text.length;
-        let r = len / 2;
-        //todo 1,loop 1 dom insert
-        for (let x = 0 - r; x < r; x++) {
-
-            //semi circle eq: y = √(r² - x²) 
-            let y = Math.floor(Math.sqrt((r * r) - (x * x)));
-            //add step multiplier
-            y = y * stepDist;
-            let letI = x + r;
-            let letter = text[letI];
-            htmlTmpl += `<span class="xplode${letI} xplode-text" 
-                        style="position: relative; top: ${y}px;" >
-                        ${letter}</span>`;
-        }
-
-        $this.html(htmlTmpl);
-        return this;
-    };
-}(jQuery));
+//
+//(function ($) {
+//
+//    /**
+//     * makes the text turn red and go in a circle like it was exploded.
+//     * @param {type} stepDist whether to cleanup.
+//     * @returns {saucer.jqueryL#285.$.fn}
+//     */
+//    $.fn.xplodeText = function (stepDist) {
+//
+//        let $this = $(this);
+//        /**
+//         * reset text
+//         * @param {type} $this
+//         * @returns {undefined}
+//         */
+//        function cleanupExplodText($this) {
+//            $this.removeClass('xplode');
+//            $this.html($this.attr('data-text-was'));
+//            $this.removeAttr('style');
+//            $('.xplode-text').remove();
+//            return;
+//        }
+//
+//        if ($this.hasClass('xplode') && stepDist === 0) {
+//            return cleanupExplodText($this);
+//        }
+//
+//
+//
+//        $this.addClass('xplode').css('position', 'relative');
+//        const text = $.trim($this.text());
+//        $this.attr('data-text-was', text);
+//        let htmlTmpl = '';
+//        let len = text.length;
+//        let r = len / 2;
+//        //todo 1,loop 1 dom insert
+//        for (let x = 0 - r; x < r; x++) {
+//
+//            //semi circle eq: y = √(r² - x²) 
+//            let y = Math.floor(Math.sqrt((r * r) - (x * x)));
+//            //add step multiplier
+//            y = y * stepDist;
+//            let letI = x + r;
+//            let letter = text[letI];
+//            htmlTmpl += `<span class="xplode${letI} xplode-text" 
+//                        style="position: relative; top: ${y}px;" >
+//                        ${letter}</span>`;
+//        }
+//
+//        $this.html(htmlTmpl);
+//        return this;
+//    };
+//}(jQuery));
