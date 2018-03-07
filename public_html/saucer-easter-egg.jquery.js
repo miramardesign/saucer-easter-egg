@@ -171,15 +171,20 @@
              */
             flyAbove: function ($target, $saucer, cssClass) {
 
+                let minV = 200;
+                let minH = 100;
+                
                 let saucerSel = saucerEasterEgg.getStrongSaucerSelector($saucer);
                 let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
                 let {vDist, hDist, hDir, vToCiel} = distToTarget;
-                let top = Math.min(vToCiel, 200);
+                let top = Math.min(vToCiel, minV);
+                let left = Math.max( Math.abs(hDist) / 2, minH);
+                
                 //todo make the saucer fly relative to target?
                 $saucer.attr('data-text-was', $saucer.text())
                         .html('<marquee>' + settings.LABEL + '</marquee>')
                         .animate({
-                            left: hDir + "=" + Math.abs(hDist) / 2,
+                            left: hDir + "=" + left,
                             top: "-=" + top,
                             width: "+=32",
                             height: '+=5',

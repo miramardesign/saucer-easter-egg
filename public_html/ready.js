@@ -6,9 +6,13 @@ $(document).ready(function () {
 
 // with data attibute data-saucer="#saucer-btn" in html
     $('#saucer-target').flyingSaucerAttack();
+    
+    $('#saucer-target-center').flyingSaucerAttack({saucer: '#saucer-btn-center', 
+        LABEL: '===== all your base are belong to us ============='});
 
-    $('#saucer-target-right').flyingSaucerAttack({saucer: '#saucer-btn-right',
-        label: '- - - - get rekt!!!:) - - - -',
+    $('#saucer-target-right').flyingSaucerAttack({
+        saucer: '#saucer-btn-right',
+        LABEL: '- - - - get rekt!!!:) - - - -',
         stepDist: 4,
         blownColor: '#00F',
         SPEED: 1000,
