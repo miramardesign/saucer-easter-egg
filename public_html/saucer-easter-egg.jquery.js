@@ -9,10 +9,17 @@
     $.fn.flyingSaucerAttack = function (opts) {
 
         var settings = $.extend({
-            LABEL: '- - - - - - - - I WANT TO BELIEVE - - - - - - -',
+            blownColor: '#f10',
+            stepDist: 2,
+            LABEL: '- - - - - - - - I WANT T0 BEL1EVE - - - - - - -',
             SPEED: 3000,
             SND: "data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU="
         }, opts);
+        
+        /**
+         * main object
+         * @type type
+         */
         let saucerEasterEgg = {
             /**
              * constructor? todo make ES6 contstructuor
@@ -74,7 +81,7 @@
                 let parentClasses = $saucer.parents()
                         .map(function () {
                             let $this = $(this);
-                            if ( $this.attr('class') ) {
+                            if ($this.attr('class')) {
                                 return this.tagName.toLowerCase() + '.' + $this.attr('class');
                             }
 
@@ -82,6 +89,7 @@
                         .get()
                         .reverse()
                         .join(" ");
+                
                 let tagName = $saucer.get(0).tagName.toLowerCase();
                 let strongSaucerSelector = `${parentClasses} ${tagName}#${idSaucer}.${classesSaucer}`;
                 console.log('strongSaucerSElector:', strongSaucerSelector);
@@ -95,24 +103,20 @@
              */
             setupCss: function ($saucer, cssClass) {
                 console.log('$saucer', $saucer);
-                let saucerSelector = saucerEasterEgg.getStrongSaucerSelector($saucer);
-                if (typeof saucerSelector !== 'string') {
-                    console.log(typeof saucerSelector);
-                    throw 'saucerSel not string is listed above';
-                }
-
+                let strongSaucerSelector = saucerEasterEgg.getStrongSaucerSelector($saucer);
+      
                 const saucerCss = `
 
                 /* saucer shots stuffe */
-                ${saucerSelector}::before, 
-                ${saucerSelector}.shot::after{
+                ${strongSaucerSelector}::before, 
+                ${strongSaucerSelector}.shot::after{
                     color: transparent;
                     content: " ";
                     display: inline-block;
                 }
 
                 /* laser blast */
-                ${saucerSelector}.shot::after {
+                ${strongSaucerSelector}.shot::after {
                     background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%, rgba(255, 48, 25, 0.95) 51%, rgba(255, 186, 178, 1) 51%, rgba(255, 255, 255, 0.68) 54%, rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
                     border-radius: 12px; 
                     margin-left: 52px;
@@ -120,7 +124,7 @@
                 }
                 
                 /* top of saucer */
-                ${saucerSelector}::before {
+                ${strongSaucerSelector}::before {
                     background-color: #e9e9e9;
                     border-radius: 6px;
                     height: 8px;
@@ -136,7 +140,7 @@
 
 
                 /* flying saucer */
-                ${saucerSelector}{
+                ${strongSaucerSelector}{
                   /*transition: all 2s ease; */
                   min-width: 100px;
                   max-width: 124px;
@@ -146,14 +150,14 @@
                 }
 
                 /* marquee w/ banner */
-                ${saucerSelector} marquee{
+                ${strongSaucerSelector} marquee{
                     width: 100px;  
                 }
                 
+                /*misc styles (target really) */
                 .blown-text{
                     position: relative;
                 }
-
 
                 `;
 
@@ -192,12 +196,12 @@
              * @returns {undefined}
              */
             appendCssToPage: function (css, cssClass) {
-                $(`<style class="appended-style flying-saucer ${cssClass}"  > ${css}</style>`)
+                $(`<style class="${cssClass}"  > ${css}</style>`)
                         .appendTo('head');
-                if(!cssClass){
+                if (!cssClass) {
                     throw 'need css Id';
                 }
-                
+
             },
             /**
              * blow it up like the mythbusters, using plugin.
@@ -205,11 +209,11 @@
              * @returns {undefined}
              */
             blowUpTarget: function ($target) {
-                $target.css('color', '#f10')
-                         .delay(900)
+                $target.css('color', settings.blownColor)
+                        .delay(900)
                         .fadeOut('slow');
-                
-                saucerEasterEgg.blowupText(2, $target);
+
+                saucerEasterEgg.blowupText(settings.stepDist, $target);
             },
             /**
              * make the text blow up in a circle
@@ -218,8 +222,7 @@
              * todo return es6 promises?
              * @returns {undefined}
              */
-            blowupText: function(stepDist, $target) {
-                //let $this = $(this);
+            blowupText: function (stepDist, $target) {
                 /**
                  * reset text
                  * @param {type} $target
@@ -237,38 +240,36 @@
                     return cleanupBlownText($target);
                 }
 
-
                 $target.addClass('blown-wrap');
-                //moved to css
-                        //.css('position', 'relative');
-                
-                
+
                 const text = $.trim($target.text());
                 $target.attr('data-text-was', text);
-                let htmlTmpl = '';
-                let len = text.length;
-                let r = len / 2;
-                //todo 1,loop 1 dom insert
-                for (let x = 0 - r; x < r; x++) {
+                let htmlTmpl = [];
+                let lenLenText = text.length;
+                let halfLenText = lenLenText / 2;
 
-                    //semi circle eq: y = √(r² - x²) 
-                    let y = Math.floor(Math.sqrt((r * r) - (x * x)));
-                    //add step multiplier
-                    y = y * stepDist;
-                    let letI = x + r;
+                for (let x = 0 - halfLenText; x < halfLenText; x++) {
+
+                    // equation: y = √(r² - x²) 
+                    let top = Math.floor(Math.sqrt((halfLenText * halfLenText) - (x * x)));
+
+                    let topMulted = top * stepDist;
+                    let letI = x + halfLenText;
                     let letter = text[letI];
-                    htmlTmpl += `<span class="blown${letI} blown-text" 
-                        style="position: relative; top: ${y}px;" >
+                    let line = `<span class="blown${letI} blown-text" 
+                        style="top: ${topMulted}px;" >
                         ${letter}</span>`;
+                    htmlTmpl.push(line);
                 }
 
-                $target.html(htmlTmpl);
+                $target.html(htmlTmpl.join(''));
                 // return this;  return a promise?
             },
             /**
              * shot w/ the laser css 
-             * @param {type} distToTarget
-             * @param {type} saucerSel
+             * @param {object} distToTarget
+             * @param {string} saucerSel
+             * @param {string} cssClass
              * @returns {undefined}
              */
             makeShot: function (distToTarget, saucerSel, cssClass) {
@@ -296,7 +297,7 @@
                 saucerEasterEgg.appendCssToPage(sizeCssShot, cssClass);
             },
             /**
-             * sound using base64 sound
+             * sound using base64 sound passed in from options for max dopeness
              * @returns {undefined}
              */
             sound: function () {
@@ -307,7 +308,8 @@
              * blow it up from orbit
              * @param {type} $saucer
              * @param {type} $target
-             * @param {type} saucerSel
+             * @param {string} saucerSel
+             * @param {string} cssClass the class to removve
              * @returns {undefined}
              */
             shootSaucerTarget: function ($saucer, $target, saucerSel, cssClass) {
@@ -366,17 +368,17 @@
 
                     saucerEasterEgg.clearPage($saucer, $target);
                 });
-            }, /**
+            },
+            /**
              * cleanup, need to make perfectly like was before
              * @param {type} $saucer to cleanup the damn saucer
              * @param {type} $target
              * @returns {undefined}
              */
             clearPage: function ($saucer, $target) {
-                // $('.appended-style').remove();
+
                 var cssClass = $target.data('cssClass');
                 $('.' + cssClass).remove();
-
 
                 if (!$saucer) {
                     return;
@@ -385,10 +387,9 @@
                 $saucer.removeAttr('style');
                 $saucer.text($saucer.attr('data-text-was'));
                 $target.html($target.attr('data-text-was')).removeAttr('style');
-                
-                //$target.xplodeText(0);
+
                 saucerEasterEgg.blowupText(0, $target);
-                
+
                 $target.data('isFlying', false);
             }
         };
