@@ -35,15 +35,15 @@
 
                     let timestamp = Math.floor(Date.now() / 1000);
 
-                    let cssId = 'saucer' + timestamp;
-                    $target.data('cssId', cssId);
+                    let cssClass = 'saucer' + timestamp;
+                    $target.data('cssClass', cssClass);
 
                     $target.data('isFlying', true);
                     window.setTimeout(function () {
 
-                        saucerEasterEgg.setupCss($saucer, cssId);
+                        saucerEasterEgg.setupCss($saucer, cssClass);
                         window.setTimeout(function () {
-                            saucerEasterEgg.flyAbove($target, $saucer);
+                            saucerEasterEgg.flyAbove($target, $saucer, cssClass);
                         }, 500);
                     }, 500);
                 }
@@ -74,10 +74,7 @@
                 let parentClasses = $saucer.parents()
                         .map(function () {
                             let $this = $(this);
-                            if (this.tagName !== 'BODY'
-                                    && this.tagName !== 'HTML'
-                                    && $this.attr('class')
-                                    ) {
+                            if ( $this.attr('class') ) {
                                 return this.tagName.toLowerCase() + '.' + $this.attr('class');
                             }
 
@@ -93,10 +90,10 @@
             /**
              * setup the styles for the page.
              * @param {object} $saucer element of the saucer
-             * @param {string} cssId for removing css from head
+             * @param {string} cssClass for removing css from head
              * @returns {undefined}
              */
-            setupCss: function ($saucer, cssId) {
+            setupCss: function ($saucer, cssClass) {
                 console.log('$saucer', $saucer);
                 let saucerSelector = saucerEasterEgg.getStrongSaucerSelector($saucer);
                 if (typeof saucerSelector !== 'string') {
@@ -107,15 +104,15 @@
                 const saucerCss = `
 
                 /* saucer shots stuffe */
-                html body ${saucerSelector}::before, 
-                html body ${saucerSelector}.shot::after{
+                ${saucerSelector}::before, 
+                ${saucerSelector}.shot::after{
                     color: transparent;
                     content: " ";
                     display: inline-block;
                 }
 
                 /* laser blast */
-                html body ${saucerSelector}.shot::after {
+                ${saucerSelector}.shot::after {
                     background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%, rgba(255, 48, 25, 0.95) 51%, rgba(255, 186, 178, 1) 51%, rgba(255, 255, 255, 0.68) 54%, rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
                     border-radius: 12px; 
                     margin-left: 52px;
@@ -123,7 +120,7 @@
                 }
                 
                 /* top of saucer */
-                html body ${saucerSelector}::before {
+                ${saucerSelector}::before {
                     background-color: #e9e9e9;
                     border-radius: 6px;
                     height: 8px;
@@ -139,7 +136,7 @@
 
 
                 /* flying saucer */
-                html body ${saucerSelector}{
+                ${saucerSelector}{
                   /*transition: all 2s ease; */
                   min-width: 100px;
                   max-width: 124px;
@@ -149,7 +146,7 @@
                 }
 
                 /* marquee w/ banner */
-                html body ${saucerSelector} marquee{
+                ${saucerSelector} marquee{
                     width: 100px;  
                 }
                 
@@ -160,7 +157,7 @@
 
                 `;
 
-                saucerEasterEgg.appendCssToPage(saucerCss, cssId);
+                saucerEasterEgg.appendCssToPage(saucerCss, cssClass);
             },
             /**
              * start flying  up
@@ -168,7 +165,7 @@
              * @param {type} $saucer
              * @returns {undefined}
              */
-            flyAbove: function ($target, $saucer) {
+            flyAbove: function ($target, $saucer, cssClass) {
 
                 let saucerSel = saucerEasterEgg.getStrongSaucerSelector($saucer);
                 let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
@@ -185,19 +182,22 @@
                             borderRadius: '+=20'
                         }, settings.SPEED, function () {
 
-                            saucerEasterEgg.shootSaucerTarget($saucer, $target, saucerSel);
+                            saucerEasterEgg.shootSaucerTarget($saucer, $target, saucerSel, cssClass);
                         }).css('overflow', 'visible');
             },
             /**
              * append a style tag to page head, so it can be removed later.
              * @param {type} css striing to add
-             * @param {type} cssId identifier so we can remove it from head.
+             * @param {type} cssClass identifier so we can remove it from head.
              * @returns {undefined}
              */
-            appendCssToPage: function (css, cssId) {
-                $(`<style class="appended-style flying-saucer" > ${css}</style>`)
-                        .appendTo('head')
-                        .attr('id', cssId);
+            appendCssToPage: function (css, cssClass) {
+                $(`<style class="appended-style flying-saucer ${cssClass}"  > ${css}</style>`)
+                        .appendTo('head');
+                if(!cssClass){
+                    throw 'need css Id';
+                }
+                
             },
             /**
              * blow it up like the mythbusters, using plugin.
@@ -206,8 +206,7 @@
              */
             blowUpTarget: function ($target) {
                 $target.css('color', '#f10')
-                        //.xplodeText(2)
-                        .delay(900)
+                         .delay(900)
                         .fadeOut('slow');
                 
                 saucerEasterEgg.blowupText(2, $target);
@@ -239,7 +238,7 @@
                 }
 
 
-                $target.addClass('blown-wrap')
+                $target.addClass('blown-wrap');
                 //moved to css
                         //.css('position', 'relative');
                 
@@ -266,14 +265,13 @@
                 $target.html(htmlTmpl);
                 // return this;  return a promise?
             },
-
             /**
              * shot w/ the laser css 
              * @param {type} distToTarget
              * @param {type} saucerSel
              * @returns {undefined}
              */
-            makeShot: function (distToTarget, saucerSel) {
+            makeShot: function (distToTarget, saucerSel, cssClass) {
                 saucerEasterEgg.sound();
 
                 const origMarginLeft = -52;
@@ -283,7 +281,7 @@
                 if (distToTarget.hDist < 0) {
                     offset = origMarginLeft;
                     sizeCssShot += `
-                    html body ${saucerSel}.shot::after{ 
+                    ${saucerSel}.shot::after{ 
                         margin-left: ${(origMarginLeft + distToTarget.hDist)}px;
                         transform: scaleY(-1);
                     }`;
@@ -291,11 +289,11 @@
                 }
 
                 sizeCssShot += `
-                    html body ${saucerSel}.shot::after{ 
+                    ${saucerSel}.shot::after{ 
                         width: ${(distToTarget.hDist + offset)}px;
                         height: ${distToTarget.vDist }px;
                     }`;
-                saucerEasterEgg.appendCssToPage(sizeCssShot);
+                saucerEasterEgg.appendCssToPage(sizeCssShot, cssClass);
             },
             /**
              * sound using base64 sound
@@ -312,11 +310,11 @@
              * @param {type} saucerSel
              * @returns {undefined}
              */
-            shootSaucerTarget: function ($saucer, $target, saucerSel) {
+            shootSaucerTarget: function ($saucer, $target, saucerSel, cssClass) {
 
                 //get distance to target, pass it to css as width of after and shoot
                 let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
-                saucerEasterEgg.makeShot(distToTarget, saucerSel);
+                saucerEasterEgg.makeShot(distToTarget, saucerSel, cssClass);
                 saucerEasterEgg.blowUpTarget($target);
                 $saucer.addClass('shot');
                 //---------xxxxxxxxxxxxxxxxxxxxxxxxxx----
@@ -376,8 +374,8 @@
              */
             clearPage: function ($saucer, $target) {
                 // $('.appended-style').remove();
-                var cssId = $target.data('cssId');
-                $('#' + cssId).remove();
+                var cssClass = $target.data('cssClass');
+                $('.' + cssClass).remove();
 
 
                 if (!$saucer) {
@@ -425,57 +423,3 @@
     };
 }(jQuery, Math));
 
-//
-//(function ($) {
-//
-//    /**
-//     * makes the text turn red and go in a circle like it was exploded.
-//     * @param {type} stepDist whether to cleanup.
-//     * @returns {saucer.jqueryL#285.$.fn}
-//     */
-//    $.fn.xplodeText = function (stepDist) {
-//
-//        let $this = $(this);
-//        /**
-//         * reset text
-//         * @param {type} $this
-//         * @returns {undefined}
-//         */
-//        function cleanupExplodText($this) {
-//            $this.removeClass('xplode');
-//            $this.html($this.attr('data-text-was'));
-//            $this.removeAttr('style');
-//            $('.xplode-text').remove();
-//            return;
-//        }
-//
-//        if ($this.hasClass('xplode') && stepDist === 0) {
-//            return cleanupExplodText($this);
-//        }
-//
-//
-//
-//        $this.addClass('xplode').css('position', 'relative');
-//        const text = $.trim($this.text());
-//        $this.attr('data-text-was', text);
-//        let htmlTmpl = '';
-//        let len = text.length;
-//        let r = len / 2;
-//        //todo 1,loop 1 dom insert
-//        for (let x = 0 - r; x < r; x++) {
-//
-//            //semi circle eq: y = √(r² - x²) 
-//            let y = Math.floor(Math.sqrt((r * r) - (x * x)));
-//            //add step multiplier
-//            y = y * stepDist;
-//            let letI = x + r;
-//            let letter = text[letI];
-//            htmlTmpl += `<span class="xplode${letI} xplode-text" 
-//                        style="position: relative; top: ${y}px;" >
-//                        ${letter}</span>`;
-//        }
-//
-//        $this.html(htmlTmpl);
-//        return this;
-//    };
-//}(jQuery));
