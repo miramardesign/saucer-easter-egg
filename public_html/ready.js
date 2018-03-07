@@ -1,17 +1,10 @@
-//$('body').on("click", '#saucer-target', function (e) {
-//    console.log('click');
-//    $('#saucer-btn').flyingSaucerAttack(e);
-//});
-//
-//$('body').on("click", '#saucer-target-right', function (e) {
-//    console.log('click');
-//    $('#saucer-btn-right').flyingSaucerAttack(e);
-//});
-
-//   $('#saucer-btn-right').flyingSaucerAttack('#saucer-target-right');
+/**
+ * this file calls the saucer plugin on jQuery ready. 
+ * @type type
+ */
 $(document).ready(function(){
-   $('#saucer-target-right').flyingSaucerAttack({saucer: '#saucer-btn-right'});
+   $('#saucer-target-right').flyingSaucerAttack({saucer: '#saucer-btn-right', label: '- - - - get rekt!!!:) - - - -'});
    
-   //todo add support for data-saucer attribute while passing no opts.
+   // with data attibute data-saucer="#saucer-btn" in html
    $('#saucer-target').flyingSaucerAttack();
 });

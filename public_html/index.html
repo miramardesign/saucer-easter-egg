@@ -6,31 +6,23 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="bower_components/boostrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+        <link href="example.css" rel="stylesheet" type="text/css"/>
+    
     </head>
     <body>
-        <div class="row">
+        
+        <div class="row spacer-row">
 
             <div class="col-md-12">
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
             </div>
         </div>
+
         <div class="row">
 
             <div class="col-md-1">
             </div>
             <div class="col-md-2">
-                <span id="saucer-target">target click me to blow me up</span>
+                <span id="saucer-target" data-saucer="#saucer-btn">target click me to blow me up</span>
             </div>
             <div class="col-md-6">
                
@@ -38,14 +30,37 @@
 
 
             <div class="col-md-2">
-                <button id="saucer" class="saucer">
+                <button id="saucer-btn" class="saucer btn btn-primary">
                     <span>button</span>
                 </button>
             </div>
         </div>
+        <div class="row  spacer-row">
 
+            <div class="col-md-12">
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-md-1">
+            </div>
+            <div class="col-md-2">
+                <br>
+                <br>
+                <br>
+                <button id="saucer-btn-right" class="saucer">
+                    button no span
+                </button>
+            </div>
+            <div class="col-md-6">
+            </div>
+
+            <div class="col-md-2">
+                <span id="saucer-target-right">target on no inner span</span>
+            </div>
+        </div>
         <script src="bower_components/jquery/dist/jquery.min.js" ></script>
-        <script src="saucer.jquery.js" ></script>
+        <script src="saucer-easter-egg.jquery.js" ></script>
         <script src="ready.js" ></script>
     </body>
 </html>
