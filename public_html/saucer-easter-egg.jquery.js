@@ -2,6 +2,22 @@
 (function ($, Math, window) {
 
     /**
+     * promise based delay for animations
+     * @param {type} ms
+     * @returns {saucer-easter-egg.jqueryL#2.delay.p|p.saucer-easter-egg.jqueryL#2#delay#p}
+     */
+    function delay(ms) {
+        var ctr, rej, p = new Promise(function (resolve, reject) {
+            ctr = window.setTimeout(resolve, ms);
+            rej = reject;
+        });
+        p.cancel = function () {
+            clearTimeout(ctr);
+            rej(Error("Cancelled"));
+        };
+        return p;
+    }
+    /**
      * flying saucer easter egg jQuery plugin.
      * @param {object} opts the options object 
      * @returns {object} jQuery object return
@@ -11,7 +27,7 @@
         var settings;
 
         /**
-         * main object
+         * main object that  encompasses everything
          * @type type
          */
         let saucerEasterEgg = {
@@ -21,9 +37,9 @@
              * @param {object} $saucer the jquery element for the saucer the saucer jQuery object
              * @returns {undefined}
              */
-            init: function ($target, $saucer) {
+            run: function ($target, $saucer) {
                 if ($target.data('isFlying')) {
-                    console.log('already flying?');
+                    console.log('is flying returning');
                     return;
                 } else {
 
@@ -35,18 +51,31 @@
                     }
 
                     let timestamp = Math.floor(Date.now() / 1000);
-
                     let cssClass = 'saucer' + timestamp;
                     $target.data('cssClass', cssClass);
 
                     $target.data('isFlying', true);
-                    window.setTimeout(function () {
 
-                        saucerEasterEgg.setupCss($saucer, cssClass);
-                        window.setTimeout(function () {
-                            saucerEasterEgg.flyAbove($target, $saucer, cssClass);
-                        }, 500);
-                    }, 500);
+//                    window.setTimeout(function () {
+//
+//                        saucerEasterEgg.setupCss($saucer, cssClass);
+//                        window.setTimeout(function () {
+//                            saucerEasterEgg.flyAbove($target, $saucer, cssClass);
+//                        }, 500);
+//                    }, 500);
+
+                    delay(500).then(
+                            function () {
+                                saucerEasterEgg.setupCss($saucer, cssClass);
+                            }
+                    ).then(
+                            function () {
+                                saucerEasterEgg.flyAbove($target, $saucer, cssClass);
+                            }
+                    );
+
+
+
                 }
             },
             /**
@@ -70,8 +99,7 @@
                     throw 'no class on saucer please add valid class to the saucer button to make strong selector';
                 }
 
-                //need to make stronger, 
-                //go up 4 parents get the class if any and add to the selector if body hit, stop
+                //get all the classes and elements to the body html
                 let parentClasses = $saucer.parents()
                         .map(function () {
                             let $this = $(this);
@@ -140,12 +168,12 @@
 
                 /* flying saucer */
                 ${strongSaucerSelector}{
-                  /*transition: all 2s ease; */
-                  min-width: 100px;
-                  max-width: 124px;
-                  box-shadow: -8px 10px 22px 0px rgba(0,0,0,0.75);
-                  z-index: 10001;
-                  position: relative;
+                    min-width: 100px;
+                    max-width: 124px;
+                    box-shadow: -8px 10px 22px 0px rgba(0,0,0,0.55);
+                    z-index: 10001;
+                    position: relative;
+                    overflow: visible;
                 }
 
                 /* marquee w/ banner */
@@ -157,7 +185,6 @@
                 .blown-text{
                     position: relative;
                 }
-
                 `;
 
                 saucerEasterEgg.appendCssToPage(saucerCss, cssClass);
@@ -173,13 +200,13 @@
 
                 let minV = 200;
                 let minH = 100;
-                
+
                 let saucerSel = saucerEasterEgg.getStrongSaucerSelector($saucer);
                 let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
                 let {vDist, hDist, hDir, vToCiel} = distToTarget;
                 let top = Math.min(vToCiel, minV);
-                let left = Math.max( Math.abs(hDist) / 2, minH);
-                
+                let left = Math.max(Math.abs(hDist) / 2, minH);
+
                 //todo make the saucer fly relative to target?
                 $saucer.attr('data-text-was', $saucer.text())
                         .html('<marquee>' + settings.LABEL + '</marquee>')
@@ -192,7 +219,8 @@
                         }, settings.SPEED, function () {
 
                             saucerEasterEgg.shootSaucerTarget($saucer, $target, saucerSel, cssClass);
-                        }).css('overflow', 'visible');
+                        })
+                        .css('overflow', 'visible');
             },
             /**
              * append a style tag to page head, so it can be removed later.
@@ -277,8 +305,8 @@
              * @param {string} cssClass
              * @returns {undefined}
              */
-            makeShot: function (distToTarget, saucerSel, cssClass) {
-                saucerEasterEgg.sound();
+            shootLaser: function (distToTarget, saucerSel, cssClass) {
+                saucerEasterEgg.playSnd();
 
                 const origMarginLeft = -52;
                 let offset = 0;
@@ -305,7 +333,7 @@
              * sound using base64 sound passed in from options for max dopeness
              * @returns {undefined}
              */
-            sound: function () {
+            playSnd: function () {
                 let aud = new Audio(settings.SND);
                 aud.play();
             },
@@ -321,17 +349,18 @@
 
                 //get distance to target, pass it to css as width of after and shoot
                 let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
-                saucerEasterEgg.makeShot(distToTarget, saucerSel, cssClass);
+                saucerEasterEgg.shootLaser(distToTarget, saucerSel, cssClass);
                 saucerEasterEgg.blowUpTarget($target);
                 $saucer.addClass('laser');
-                //---------xxxxxxxxxxxxxxxxxxxxxxxxxx----
-                // return; //debug stop point
-                window.setTimeout(function () {
-                    $saucer.removeClass('laser');
-                    window.setTimeout(function () {
-                        saucerEasterEgg.flyAway($saucer, $target);
-                    }, 500);
-                }, 1000);
+
+                delay(500).then(
+                        function () {
+                            $saucer.removeClass('laser');
+                        }
+                ).then(
+                        function () {
+                            saucerEasterEgg.flyAway($saucer, $target);
+                        });
             },
             /**
              * get a distance object to caculate the laser divs,
@@ -365,11 +394,11 @@
             flyAway: function ($saucer, $target) {
 
                 let rand = Math.floor(Math.random() * 10);
-                let leftOrRightRandom = rand % 2 === 0 ? '+' : '-';
-                let leftD = leftOrRightRandom + "=2000";
+                let plusOrMinusRandom = rand % 2 === 0 ? '+' : '-';
+                let leftD = plusOrMinusRandom + "=2000";
                 $saucer.animate({
                     left: leftD,
-                    top: leftOrRightRandom + '=' + (rand * 200)}, 6000, function () {
+                    top: plusOrMinusRandom + '=' + (rand * 200)}, 6000, function () {
 
                     saucerEasterEgg.clearPage($saucer, $target);
                 });
@@ -405,7 +434,7 @@
         return this.each(function () {
 
             let $target = $(this);
-            
+
             /**
              * get opts from data attributes if not passed in.
              * should all work.
@@ -413,7 +442,7 @@
             if (!opts) {
                 opts = $target.data();
             }
-            
+
             settings = $.extend({
                 blownColor: '#f10',
                 stepDist: 2,
@@ -427,11 +456,10 @@
 
             $target.click(function () {
                 console.log('id:', $saucer.attr('id'));
-                saucerEasterEgg.init($target, $saucer);
+                saucerEasterEgg.run($target, $saucer);
             });
         });
 
         return this;
     };
 }(jQuery, Math, window));
-
