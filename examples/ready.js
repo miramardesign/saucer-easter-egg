@@ -9,7 +9,9 @@ $(document).ready(function () {
     $('.saucer-targets-both').flyingSaucerAttack();
     
     $('#saucer-target-center').flyingSaucerAttack({saucer: '#saucer-btn-center', 
-        LABEL: '===== all your base are belong to us ============='});
+        LABEL: '===== all your base are belong to us =============',
+        SND: null
+    });
 
     $('#saucer-target-right').flyingSaucerAttack({saucer: '#saucer-btn-right',
         LABEL: '- - - - get rekt!!!:) - - - -',
