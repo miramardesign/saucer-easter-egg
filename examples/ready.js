@@ -9,16 +9,16 @@ $(document).ready(function () {
     $('.saucer-targets-both').flyingSaucerAttack();
     
     $('#saucer-target-center').flyingSaucerAttack({saucer: '#saucer-btn-center', 
-        LABEL: '===== all your base are belong to us =============',
-        SND: null
+        label: '===== all your base are belong to us =============',
+        snd: null
     });
 
     $('#saucer-target-right').flyingSaucerAttack({saucer: '#saucer-btn-right',
-        LABEL: '- - - - get rekt!!!:) - - - -',
+        label: '- - - - get rekt!!!:) - - - -',
         stepDist: 4,
         blownColor: '#00F',
-        SPEED: 1000,
-        SND: `data:audio/wav;base64,UklGRl5DBQBXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YVBCBQAAAAAAAAD//wAA///+
+        speed: 1000,
+        snd: `data:audio/wav;base64,UklGRl5DBQBXQVZFZm10IBAAAAABAAIARKwAABCxAgAEABAAZGF0YVBCBQAAAAAAAAD//wAA///+
 /////v///wAA//8CAP7/AQD/////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 AAAAAAAAAAAAAAAAAAD//wAA//8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAMAFgAW
 ABkAFAARABgABwAoAP//KgANACIAJwAaAC0AGQAiABQAFgAJABIAAQAXABcAIAA0ACcAOQAnACsA
