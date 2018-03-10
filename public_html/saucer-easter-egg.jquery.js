@@ -2,23 +2,6 @@
 (function ($, Math, Date, window) {
 
     /**
-     * promise based delay for animations
-     * @param {type} ms
-     * @returns {saucer-easter-egg.jqueryL#2.delay.p|p.saucer-easter-egg.jqueryL#2#delay#p}
-     * http://jamesknelson.com/grokking-es6-promises-the-four-functions-you-need-to-avoid-callback-hell/
-     */
-    function delay(ms) {
-        var ctr, rej, p = new Promise(function (resolve, reject) {
-            ctr = window.setTimeout(resolve, ms);
-            rej = reject;
-        });
-        p.cancel = function () {
-            clearTimeout(ctr);
-            rej(Error("Cancelled"));
-        };
-        return p;
-    }
-    /**
      * flying saucer easter egg jQuery plugin.
      * @param {object} opts the options object 
      * @returns {object} jQuery object return
@@ -34,7 +17,7 @@
         let saucerEasterEgg = {
             /**
              * constructor? todo make ES6 contstructuor
-             * @param {object} $target 
+             * @param {object} $target the text that was clicked on and will be destroyed
              * @param {object} $saucer the jquery element for the saucer the saucer jQuery object
              * @returns {undefined}
              */
@@ -53,77 +36,137 @@
 
                 let timestamp = Math.floor(Date.now() / 1000);
                 let cssClass = 'saucer' + timestamp;
-                let saucerSel = saucerEasterEgg.getStrongSaucerSelector($saucer);
+                let saucerSel = saucerEasterEgg.utils.getStrongSaucerSelector($saucer);
                 $target.data('cssClass', cssClass);
 
                 $target.data('isFlying', true);
 
-                saucerEasterEgg.setupCss($saucer, cssClass);
+                saucerEasterEgg.utils.setupCss($saucer, cssClass);
 
-                saucerEasterEgg.flyAbove($target, $saucer)
+                saucerEasterEgg.anims.flyAbove($target, $saucer)
                         .then(function () {
                             return saucerEasterEgg
+                                    .anims
                                     .shootSaucerTarget($saucer, $target, saucerSel, cssClass);
                         })
                         .then(function () {
-                            return saucerEasterEgg.flyAway($saucer, $target);
+                            return saucerEasterEgg.anims.flyAway($saucer, $target);
 
                         })
                         .then(function () {
-                            saucerEasterEgg.clearPage($saucer, $target);
+                            saucerEasterEgg.utils.clearPage($saucer, $target);
                         });
 
             },
-            /**
-             * get a strong selector for the saucer element, formerly had 
-             * .selector
-             * @param {object} $saucer the jquery element for the saucer the jQuery collection
-             * @returns  {string} the id class like '#id.class';
-             */
-            getStrongSaucerSelector($saucer) {
-                if ($saucer.first) {
-                    $saucer = $saucer.first();
-                }
-                console.log('saucer obj', $saucer);
-                console.dir($saucer);
-                let idSaucer = $saucer.attr('id');
-                let classesSaucer = $saucer.attr('class').replace(/ /gi, '.');
-                if (!idSaucer) {
-                    throw 'no id on saucer please add valid id to the saucer button to make strong selector';
-                }
-                if (!classesSaucer) {
-                    throw 'no class on saucer please add valid class to the saucer button to make strong selector';
-                }
 
-                //get all the classes and elements to the body html
-                let parentClasses = $saucer.parents()
-                        .map(function () {
-                            let $this = $(this);
-                            if ($this.attr('class')) {
-                                return this.tagName.toLowerCase() + '.' + $this.attr('class');
+            /**
+             * animations, all return promises.
+             */
+            anims: {
+                /**
+                 * start flying  up
+                 * @param {object} $target the jQuery element for the target text
+                 * @param {object} $saucer the jquery element for the saucer
+                 * @returns {object} promise of anim result
+                 */
+                flyAbove: function ($target, $saucer) {
+
+                    let minV = 200;
+                    let minH = 100;
+
+                    let distToTarget = saucerEasterEgg.utils.getDistToTarget($saucer, $target);
+                    let {vDist, hDist, hDir, vToCiel} = distToTarget;
+                    let top = Math.min(vToCiel, minV);
+                    let left = Math.max(Math.abs(hDist) / 2, minH);
+
+                    //todo make the saucer fly relative to target?
+                    return $saucer.attr('data-text-was', $saucer.text())
+                            .html('<marquee>' + settings.LABEL + '</marquee>')
+                            .animate({
+                                left: hDir + "=" + left,
+                                top: "-=" + top,
+                                width: "+=32",
+                                height: '+=5',
+                                borderRadius: '+=20'
+                            }, settings.SPEED, function () {
+                                // callback();
+                            })
+                            .css('overflow', 'visible')
+                            .promise();
+                },
+                /**
+                 * blow it up from orbit
+                 * @param {object} $saucer the jquery element for the saucer
+                 * @param {object} $target the jQuery element for the target text
+                 * @param {string} saucerSel
+                 * @param {string} cssClass the class to removve
+                 * @returns {object} promise to string animations
+                 */
+                shootSaucerTarget: function ($saucer, $target, saucerSel, cssClass) {
+
+                    //get distance to target, pass it to css as width of after and shoot
+                    let distToTarget = saucerEasterEgg.utils.getDistToTarget($saucer, $target);
+                    saucerEasterEgg.actions.shootLaser(distToTarget, saucerSel, cssClass);
+                    saucerEasterEgg.actions.blowUpTarget($target);
+                    $saucer.addClass('laser');
+
+                    return saucerEasterEgg.utils.delay(400).then(
+                            function () {
+                                $saucer.removeClass('laser');
                             }
+                    );
 
-                        })
-                        .get()
-                        .reverse()
-                        .join(" ");
+                },
+                /**
+                 * flys away semi randomly 
+                 * then calls 
+                 * @param {object} $saucer the jquery element for the saucer
+                 * @param {object} $target the jQuery element for the target text
+                 * @returns {object} promise of animation result
+                 */
+                flyAway: function ($saucer, $target) {
 
-                let tagName = $saucer.get(0).tagName.toLowerCase();
-                let strongSaucerSelector = `${parentClasses} ${tagName}#${idSaucer}.${classesSaucer}`;
-                console.log('strongSaucerSElector:', strongSaucerSelector);
-                return strongSaucerSelector;
+                    let rand = Math.floor(Math.random() * 10);
+                    let plusOrMinusRandom = rand % 2 === 0 ? '+' : '-';
+                    let leftD = plusOrMinusRandom + "=2000";
+                    return $saucer.animate({
+                        left: leftD,
+                        top: plusOrMinusRandom + '=' + (rand * 200)}, 6000
+                            )
+                            .promise();
+                }
+
+                //end anims
             },
-            /**
-             * setup the styles for the page.
-             * @param {object} $saucer element of the saucer
-             * @param {string} cssClass for removing css from head
-             * @returns {object} promise for anim
-             */
-            setupCss: function ($saucer, cssClass) {
-                console.log('$saucer', $saucer);
-                let strongSaucerSelector = saucerEasterEgg.getStrongSaucerSelector($saucer);
+            utils: {
+                /**
+                 * promise based delay for animations
+                 * @param {type} ms
+                 * @returns {object} a promise
+                 * http://jamesknelson.com/grokking-es6-promises-the-four-functions-you-need-to-avoid-callback-hell/
+                 */
+                delay: function (ms) {
+                    var ctr, rej, p = new Promise(function (resolve, reject) {
+                        ctr = window.setTimeout(resolve, ms);
+                        rej = reject;
+                    });
+                    p.cancel = function () {
+                        clearTimeout(ctr);
+                        rej(Error("Cancelled"));
+                    };
+                    return p;
+                },
+                /**
+                 * initial setup the styles for the page.
+                 * @param {object} $saucer element of the saucer
+                 * @param {string} cssClass for removing css from head
+                 * @returns {object} promise for anim
+                 */
+                setupCss: function ($saucer, cssClass) {
+                    console.log('$saucer', $saucer);
+                    let strongSaucerSelector = saucerEasterEgg.utils.getStrongSaucerSelector($saucer);
 
-                const saucerCss = `
+                    const saucerCss = `
 
                 /* saucer lasers stuffe */
                 ${strongSaucerSelector}::before, 
@@ -182,238 +225,213 @@
                 }
                 `;
 
-                saucerEasterEgg.appendCssToPage(saucerCss, cssClass);
-            },
-            /**
-             * start flying  up
-             * @param {object} $target the jQuery element for the target text
-             * @param {object} $saucer the jquery element for the saucer
-             * @returns {object} promise of anim result
-             */
-            flyAbove: function ($target, $saucer) {
-
-                let minV = 200;
-                let minH = 100;
-
-                let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
-                let {vDist, hDist, hDir, vToCiel} = distToTarget;
-                let top = Math.min(vToCiel, minV);
-                let left = Math.max(Math.abs(hDist) / 2, minH);
-
-                //todo make the saucer fly relative to target?
-                return $saucer.attr('data-text-was', $saucer.text())
-                        .html('<marquee>' + settings.LABEL + '</marquee>')
-                        .animate({
-                            left: hDir + "=" + left,
-                            top: "-=" + top,
-                            width: "+=32",
-                            height: '+=5',
-                            borderRadius: '+=20'
-                        }, settings.SPEED, function () {
-                            // callback();
-                        })
-                        .css('overflow', 'visible')
-                        .promise();
-            },
-            /**
-             * append a style tag to page head, so it can be removed later.
-             * @param {type} css striing to add
-             * @param {type} cssClass identifier so we can remove it from head.
-             * @returns {undefined}
-             */
-            appendCssToPage: function (css, cssClass) {
-                $(`<style class="${cssClass}"  > ${css}</style>`)
-                        .appendTo('head');
-                if (!cssClass) {
-                    throw 'need css Id';
-                }
-
-            },
-            /**
-             * blow it up like the mythbusters, using plugin.
-             * @param {object} $target the jQuery element for the target text
-             * @returns {undefined}
-             */
-            blowUpTarget: function ($target) {
-                $target.css('color', settings.blownColor)
-                        .delay(900)
-                        .fadeOut('slow');
-
-                saucerEasterEgg.blowupText(settings.stepDist, $target);
-            },
-            /**
-             * make the text blow up in a circle
-             * @param {type} stepDist the distance the text should spread
-             * @param {object} $target the jQuery element for the target text
-             * todo return es6 promises?
-             * @returns {undefined}
-             */
-            blowupText: function (stepDist, $target) {
+                    saucerEasterEgg.utils.appendCssToPage(saucerCss, cssClass);
+                },
                 /**
-                 * reset text
+                 * get a strong selector for the saucer element, formerly had 
+                 * .selector
+                 * @param {object} $saucer the jquery element for the saucer the jQuery collection
+                 * @returns  {string} the id class like '#id.class';
+                 */
+                getStrongSaucerSelector($saucer) {
+                    if ($saucer.first) {
+                        $saucer = $saucer.first();
+                    }
+                    console.log('saucer obj', $saucer);
+                    console.dir($saucer);
+                    let idSaucer = $saucer.attr('id');
+                    let classesSaucer = $saucer.attr('class').replace(/ /gi, '.');
+                    if (!idSaucer) {
+                        throw 'no id on saucer please add valid id to the saucer button to make strong selector';
+                    }
+                    if (!classesSaucer) {
+                        throw 'no class on saucer please add valid class to the saucer button to make strong selector';
+                    }
+
+                    //get all the classes and elements to the body html
+                    let parentClasses = $saucer.parents()
+                            .map(function () {
+                                let $this = $(this);
+                                if ($this.attr('class')) {
+                                    return this.tagName.toLowerCase() + '.' + $this.attr('class');
+                                }
+
+                            })
+                            .get()
+                            .reverse()
+                            .join(" ");
+
+                    let tagName = $saucer.get(0).tagName.toLowerCase();
+                    let strongSaucerSelector = `${parentClasses} ${tagName}#${idSaucer}.${classesSaucer}`;
+                    console.log('strongSaucerSElector:', strongSaucerSelector);
+                    return strongSaucerSelector;
+                },
+                /**
+                 * append a style tag to page head, so it can be removed later.
+                 * @param {type} css striing to add
+                 * @param {type} cssClass identifier so we can remove it from head.
+                 * @returns {undefined}
+                 */
+                appendCssToPage: function (css, cssClass) {
+                    $(`<style class="${cssClass}"  > ${css}</style>`)
+                            .appendTo('head');
+                    if (!cssClass) {
+                        throw 'need css Id';
+                    }
+
+                },
+                /**
+                 * get a distance object to caculate the laser divs,
+                 * height and width, also gets didstance to top so i can avoid going offscreen
+                 * top
+                 * @param {object} $saucer the jquery element for the saucer
+                 * @param {object} $target the jQuery element for the target text
+                 * @returns {object} object with distance info
+                 */
+                getDistToTarget: function ($saucer, $target) {
+
+                    //todo return negative so that the saucer doesnt have to be on any side
+                    let hDist = $target.offset().left - $saucer.offset().left;
+                    //forcing to shoot downward 
+                    let vDist = Math.abs($saucer.offset().top - $target.offset().top);
+                    let hDir = hDist.toString().indexOf('-') ? '+' : '-';
+                    return {
+                        hDist: hDist,
+                        vDist: vDist,
+                        hDir: hDir,
+                        vToCiel: $saucer.offset().top
+                    };
+                },
+                /**
+                 * cleanup, need to make perfectly like was before
+                 * @param {object} $saucer the jquery element for the saucer to cleanup the damn saucer
                  * @param {object} $target the jQuery element for the target text
                  * @returns {undefined}
                  */
-                function cleanupBlownText($target) {
-                    $target.removeClass('blown-wrap');
-                    $target.html($target.attr('data-text-was'));
-                    $target.removeAttr('style');
-                    $('.blown-text').remove();
-                    return;
+                clearPage: function ($saucer, $target) {
+
+                    var cssClass = $target.data('cssClass');
+                    $('.' + cssClass).remove();
+
+                    if (!$saucer) {
+                        return;
+                    }
+
+                    $saucer.removeAttr('style');
+                    $saucer.text($saucer.attr('data-text-was'));
+                    $target.html($target.attr('data-text-was')).removeAttr('style');
+
+                    saucerEasterEgg.actions.blowupText(0, $target);
+
+                    $target.data('isFlying', false);
                 }
 
-                if ($target.hasClass('blown-wrap') && stepDist === 0) {
-                    return cleanupBlownText($target);
-                }
-
-                $target.addClass('blown-wrap');
-
-                const text = $.trim($target.text());
-                $target.attr('data-text-was', text);
-                let htmlTmpl = [];
-                let lenLenText = text.length;
-                let halfLenText = lenLenText / 2;
-
-                for (let x = 0 - halfLenText; x < halfLenText; x++) {
-
-                    // equation: y = √(r² - x²) 
-                    let top = Math.floor(Math.sqrt((halfLenText * halfLenText) - (x * x)));
-
-                    let topMulted = top * stepDist;
-                    let letI = x + halfLenText;
-                    let letter = text[letI];
-                    let line = `<span class="blown${letI} blown-text" 
-                        style="top: ${topMulted}px;" >
-                        ${letter}</span>`;
-                    htmlTmpl.push(line);
-                }
-
-                $target.html(htmlTmpl.join(''));
+                //end utils
             },
             /**
-             * laser w/ the laser css 
-             * @param {object} distToTarget
-             * @param {string} saucerSel
-             * @param {string} cssClass
-             * @returns {undefined}
+             * non anim eents, things that take no time nor return promises
              */
-            shootLaser: function (distToTarget, saucerSel, cssClass) {
-                saucerEasterEgg.playSnd();
+            actions: {
+                /**
+                 * blow it up like the mythbusters, using plugin.
+                 * @param {object} $target the jQuery element for the target text
+                 * @returns {undefined}
+                 */
+                blowUpTarget: function ($target) {
+                    $target.css('color', settings.blownColor)
+                            .delay(900)
+                            .fadeOut('slow');
 
-                const origMarginLeft = -52;
-                let offset = 0;
-                let sizeCssShot = '';
-                //if saucer is to the right of target (needs work)
-                if (distToTarget.hDist < 0) {
-                    offset = origMarginLeft;
-                    sizeCssShot += `
+                    saucerEasterEgg.actions.blowupText(settings.stepDist, $target);
+                },
+                /**
+                 * make the text blow up in a circle
+                 * @param {type} stepDist the distance the text should spread
+                 * @param {object} $target the jQuery element for the target text
+                 * todo return es6 promises?
+                 * @returns {undefined}
+                 */
+                blowupText: function (stepDist, $target) {
+                    /**
+                     * reset text
+                     * @param {object} $target the jQuery element for the target text
+                     * @returns {undefined}
+                     */
+                    function cleanupBlownText($target) {
+                        $target.removeClass('blown-wrap');
+                        $target.html($target.attr('data-text-was'));
+                        $target.removeAttr('style');
+                        $('.blown-text').remove();
+                        return;
+                    }
+
+                    if ($target.hasClass('blown-wrap') && stepDist === 0) {
+                        return cleanupBlownText($target);
+                    }
+
+                    $target.addClass('blown-wrap');
+
+                    const text = $.trim($target.text());
+                    $target.attr('data-text-was', text);
+                    let htmlTmpl = [];
+                    let lenLenText = text.length;
+                    let halfLenText = lenLenText / 2;
+
+                    for (let x = 0 - halfLenText; x < halfLenText; x++) {
+
+                        // equation: y = √(r² - x²) 
+                        let top = Math.floor(Math.sqrt((halfLenText * halfLenText) - (x * x)));
+
+                        let topMulted = top * stepDist;
+                        let letI = x + halfLenText;
+                        let letter = text[letI];
+                        let line = `<span class="blown${letI} blown-text" 
+                        style="top: ${topMulted}px;" >
+                        ${letter}</span>`;
+                        htmlTmpl.push(line);
+                    }
+
+                    $target.html(htmlTmpl.join(''));
+                },
+                /**
+                 * laser w/ the laser css 
+                 * @param {object} distToTarget
+                 * @param {string} saucerSel
+                 * @param {string} cssClass
+                 * @returns {undefined}
+                 */
+                shootLaser: function (distToTarget, saucerSel, cssClass) {
+                    saucerEasterEgg.actions.playSnd();
+
+                    const origMarginLeft = -52;
+                    let offset = 0;
+                    let sizeCssShot = '';
+                    //if saucer is to the right of target (needs work)
+                    if (distToTarget.hDist < 0) {
+                        offset = origMarginLeft;
+                        sizeCssShot += `
                     ${saucerSel}.laser::after{ 
                         margin-left: ${(origMarginLeft + distToTarget.hDist)}px;
                         transform: scaleY(-1);
                     }`;
-                    distToTarget.hDist = Math.abs(distToTarget.hDist);
-                }
+                        distToTarget.hDist = Math.abs(distToTarget.hDist);
+                    }
 
-                sizeCssShot += `
+                    sizeCssShot += `
                     ${saucerSel}.laser::after{ 
                         width: ${(distToTarget.hDist + offset)}px;
                         height: ${distToTarget.vDist }px;
                     }`;
-                saucerEasterEgg.appendCssToPage(sizeCssShot, cssClass);
-            },
-            /**
-             * sound using base64 sound passed in from options for max dopeness
-             * @returns {undefined}
-             */
-            playSnd: function () {
-                let aud = new Audio(settings.SND);
-                aud.play();
-            },
-            /**
-             * blow it up from orbit
-             * @param {object} $saucer the jquery element for the saucer
-             * @param {object} $target the jQuery element for the target text
-             * @param {string} saucerSel
-             * @param {string} cssClass the class to removve
-             * @returns {object} promise to string animations
-             */
-            shootSaucerTarget: function ($saucer, $target, saucerSel, cssClass) {
-
-                //get distance to target, pass it to css as width of after and shoot
-                let distToTarget = saucerEasterEgg.getDistToTarget($saucer, $target);
-                saucerEasterEgg.shootLaser(distToTarget, saucerSel, cssClass);
-                saucerEasterEgg.blowUpTarget($target);
-                $saucer.addClass('laser');
-
-                return delay(400).then(
-                        function () {
-                            $saucer.removeClass('laser');
-                        }
-                );
-
-            },
-            /**
-             * get a distance object to caculate the laser divs,
-             * height and width, also gets didstance to top so i can avoid going offscreen
-             * top
-             * @param {object} $saucer the jquery element for the saucer
-             * @param {object} $target the jQuery element for the target text
-             * @returns {object} object with distance info
-             */
-            getDistToTarget: function ($saucer, $target) {
-
-                //todo return negative so that the saucer doesnt have to be on any side
-                let hDist = $target.offset().left - $saucer.offset().left;
-                //forcing to shoot downward 
-                let vDist = Math.abs($saucer.offset().top - $target.offset().top);
-                let hDir = hDist.toString().indexOf('-') ? '+' : '-';
-                return {
-                    hDist: hDist,
-                    vDist: vDist,
-                    hDir: hDir,
-                    vToCiel: $saucer.offset().top
-                };
-            },
-            /**
-             * flys away semi randomly 
-             * then calls 
-             * @param {object} $saucer the jquery element for the saucer
-             * @param {object} $target the jQuery element for the target text
-             * @returns {object} promise of animation result
-             */
-            flyAway: function ($saucer, $target) {
-
-                let rand = Math.floor(Math.random() * 10);
-                let plusOrMinusRandom = rand % 2 === 0 ? '+' : '-';
-                let leftD = plusOrMinusRandom + "=2000";
-                return $saucer.animate({
-                    left: leftD,
-                    top: plusOrMinusRandom + '=' + (rand * 200)}, 6000
-                        )
-                        .promise();
-            },
-            /**
-             * cleanup, need to make perfectly like was before
-             * @param {object} $saucer the jquery element for the saucer to cleanup the damn saucer
-             * @param {object} $target the jQuery element for the target text
-             * @returns {undefined}
-             */
-            clearPage: function ($saucer, $target) {
-
-                var cssClass = $target.data('cssClass');
-                $('.' + cssClass).remove();
-
-                if (!$saucer) {
-                    return;
+                    saucerEasterEgg.utils.appendCssToPage(sizeCssShot, cssClass);
+                },
+                /**
+                 * sound using base64 sound passed in from options for max dopeness
+                 * @returns {undefined}
+                 */
+                playSnd: function () {
+                    let aud = new Audio(settings.SND);
+                    aud.play();
                 }
-
-                $saucer.removeAttr('style');
-                $saucer.text($saucer.attr('data-text-was'));
-                $target.html($target.attr('data-text-was')).removeAttr('style');
-
-                saucerEasterEgg.blowupText(0, $target);
-
-                $target.data('isFlying', false);
             }
         };
 
