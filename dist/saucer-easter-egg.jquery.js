@@ -27,38 +27,40 @@
                     return;
                 }
 
-                if ($target.length === 0) {
+                if (!$target || $target.length === 0) {
                     throw  'couldnt find element to destroy, its selector was: ';
                 }
                 if (!$saucer || $saucer.length === 0) {
                     throw  'couldnt find $saucer saucer element to be destroyer its selector was: ';
                 }
 
-                let timestamp = Math.floor(Date.now() / 1000);
-                let cssClass = 'saucer' + timestamp;
+                let styleElementClass = saucerEasterEgg.utils.getStyleElementClass();
                 let saucerSel = saucerEasterEgg.utils.getStrongSaucerSelector($saucer);
-                $target.data('cssClass', cssClass);
+                $target.data('cssClass', styleElementClass);
 
                 $target.data('isFlying', true);
 
-                saucerEasterEgg.utils.setupCss($saucer, cssClass);
+                saucerEasterEgg.utils.setupCss($saucer, styleElementClass, saucerSel);
 
                 saucerEasterEgg.anims.flyAbove($target, $saucer)
                         .then(function () {
                             return saucerEasterEgg
                                     .anims
-                                    .shootSaucerTarget($saucer, $target, saucerSel, cssClass);
+                                    .shootSaucerTarget($saucer, $target, saucerSel, styleElementClass);
                         })
                         .then(function () {
-                            return saucerEasterEgg.anims.flyAway($saucer, $target);
+                            return saucerEasterEgg
+                                    .anims
+                                    .flyAway($saucer);
 
                         })
                         .then(function () {
-                            saucerEasterEgg.utils.clearPage($saucer, $target);
+                            saucerEasterEgg
+                                    .utils
+                                    .clearPage($saucer, $target, styleElementClass);
                         });
 
             },
-
             /**
              * animations, all return promises.
              */
@@ -89,7 +91,6 @@
                                 height: '+=5',
                                 borderRadius: '+=20'
                             }, settings.SPEED, function () {
-                                // callback();
                             })
                             .css('overflow', 'visible')
                             .promise();
@@ -121,10 +122,9 @@
                  * flys away semi randomly 
                  * then calls 
                  * @param {object} $saucer the jquery element for the saucer
-                 * @param {object} $target the jQuery element for the target text
                  * @returns {object} promise of animation result
                  */
-                flyAway: function ($saucer, $target) {
+                flyAway: function ($saucer) {
 
                     let rand = Math.floor(Math.random() * 10);
                     let plusOrMinusRandom = rand % 2 === 0 ? '+' : '-';
@@ -160,70 +160,69 @@
                  * initial setup the styles for the page.
                  * @param {object} $saucer element of the saucer
                  * @param {string} cssClass for removing css from head
+                 * @param {string} strongSaucerSelector css selector all the way to body
                  * @returns {object} promise for anim
                  */
-                setupCss: function ($saucer, cssClass) {
+                setupCss: function ($saucer, cssClass, strongSaucerSelector) {
                     console.log('$saucer', $saucer);
-                    let strongSaucerSelector = saucerEasterEgg.utils.getStrongSaucerSelector($saucer);
 
                     const saucerCss = `
+                    /* saucer lasers stuffe */
+                    ${strongSaucerSelector}::before, 
+                    ${strongSaucerSelector}.laser::after{
+                        color: transparent;
+                        content: " ";
+                        display: inline-block;
+                    }
 
-                /* saucer lasers stuffe */
-                ${strongSaucerSelector}::before, 
-                ${strongSaucerSelector}.laser::after{
-                    color: transparent;
-                    content: " ";
-                    display: inline-block;
-                }
+                    /* laser blast */
+                    ${strongSaucerSelector}.laser::after {
+                        background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, 
+                            rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%,
+                            rgba(255, 48, 25, 0.95) 51%, 
+                            rgba(255, 186, 178, 1) 51%, 
+                            rgba(255, 255, 255, 0.68) 54%,
+                            rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
+                        border-radius: 12px; 
+                        margin-left: 52px;
+                        margin-top: 4px;
+                    }
 
-                /* laser blast */
-                ${strongSaucerSelector}.laser::after {
-                    background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, 
-                        rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%,
-                        rgba(255, 48, 25, 0.95) 51%, 
-                        rgba(255, 186, 178, 1) 51%, 
-                        rgba(255, 255, 255, 0.68) 54%,
-                        rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
-                    border-radius: 12px; 
-                    margin-left: 52px;
-                    margin-top: 4px;
-                }
-                
-                /* top of saucer */
-                ${strongSaucerSelector}::before {
-                    background-color: #e9e9e9;
-                    border-radius: 6px;
-                    height: 8px;
-                    top: -6px;
-                    left: 8%;
-                    position: absolute;
-                    width: 82px;
-                    left: 20px;
+                    /* top of saucer */
+                    ${strongSaucerSelector}::before {
+                        background-color: #e9e9e9;
+                        border-radius: 6px;
+                        height: 8px;
+                        top: -6px;
+                        left: 8%;
+                        position: absolute;
+                        width: 82px;
+                        left: 20px;
 
-                    /* todo make same color as the button */
-                    border-top: 1px solid rgb(208, 208, 208);
-                }
- 
-                /* flying saucer */
-                ${strongSaucerSelector}{
-                    min-width: 100px;
-                    max-width: 124px;
-                    box-shadow: -8px 10px 22px 0px rgba(0,0,0,0.55);
-                    z-index: 10001;
-                    position: relative;
-                    overflow: visible;
-                }
+                        /* todo make same color as the button */
+                        border-top: 1px solid rgb(208, 208, 208);
+                    }
 
-                /* marquee w/ banner */
-                ${strongSaucerSelector} marquee{
-                    width: 100px;  
-                }
-                
-                /*misc styles (target really) */
-                .blown-text{
-                    position: relative;
-                }
-                `;
+                    /* flying saucer */
+                    ${strongSaucerSelector}{
+                        min-width: 100px;
+                        max-width: 124px;
+                        box-shadow: -8px 10px 22px 0px rgba(0,0,0,0.55);
+                        z-index: 10001;
+                        position: relative;
+                        overflow: visible;
+                    }
+
+                    /* marquee w/ banner */
+                    ${strongSaucerSelector} marquee{
+                        width: 100px;  
+                    }
+
+                    /*misc styles (target really) */
+                    .blown-text{
+                        position: relative;
+                    }
+                    `;
 
                     saucerEasterEgg.utils.appendCssToPage(saucerCss, cssClass);
                 },
@@ -281,6 +280,17 @@
 
                 },
                 /**
+                 * gets timestamp id for added <style> tags
+                 * @returns {String} the css class with timestamp id
+                 */
+                getStyleElementClass() {
+
+                    let timestamp = Math.floor(Date.now() / 1000);
+                    let cssClass = 'saucer' + timestamp;
+                    return cssClass;
+                },
+
+                /**
                  * get a distance object to caculate the laser divs,
                  * height and width, also gets didstance to top so i can avoid going offscreen
                  * top
@@ -306,12 +316,12 @@
                  * cleanup, need to make perfectly like was before
                  * @param {object} $saucer the jquery element for the saucer to cleanup the damn saucer
                  * @param {object} $target the jQuery element for the target text
+                 * @param {string} styleElementClass the class of css to remove 
                  * @returns {undefined}
                  */
-                clearPage: function ($saucer, $target) {
+                clearPage: function ($saucer, $target, styleElementClass) {
 
-                    var cssClass = $target.data('cssClass');
-                    $('.' + cssClass).remove();
+                    $('.' + styleElementClass).remove();
 
                     if (!$saucer) {
                         return;
