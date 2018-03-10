@@ -396,10 +396,10 @@
                  * @returns {undefined}
                  */
                 cleanupBlownText: function ($target) {
-                    $target.removeClass('blown-wrap');
-                    $target.html($target.attr('data-text-was'));
-                    $target.removeAttr('style');
-                    $('.blown-text').remove();
+                    $target.removeClass('blown-wrap')
+                            .html($target.attr('data-text-was'))
+                            .removeAttr('style');
+                    $target.children('.blown-text').remove();
                     return;
                 },
                 /**
