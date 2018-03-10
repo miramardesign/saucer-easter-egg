@@ -1,16 +1,20 @@
+Flying Saucer Easter  Egg
 
+Click on a text element in the page, and then a designated button transforms into 
+a flying  saucer, flies over your target element zaps it with a laser, then 
+flies away. The page is then reset perfectly like nothing happened.
+
+Usage:
+    $('#saucer-target-center').flyingSaucerAttack({saucer: '#saucer-btn-center');
+
+See examples and ready.js for more options.
 
 '''todo '''
-move click inside plugin and add data target. (option).
 move to dist, 
 put in bower
 document
 make examples folder
 
-bugs:
-button text not resetting,DONE
-target text not restoring-DONE
 
 
-
-dependencies: jQuery, boostrap (style of demo)
+dependencies: jQuery
