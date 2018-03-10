@@ -162,7 +162,7 @@
                  * @param {string} strongSaucerSelector css selector all the way to body
                  * @returns {object} promise for anim
                  */
-                setupCss: function ( cssClass, strongSaucerSelector) {
+                setupCss: function (cssClass, strongSaucerSelector) {
 
                     const saucerCss = `
                     /* saucer lasers stuffe */
@@ -360,21 +360,10 @@
                  * @returns {undefined}
                  */
                 blowupText: function (stepDist, $target) {
-                    /**
-                     * reset text
-                     * @param {object} $target the jQuery element for the target text
-                     * @returns {undefined}
-                     */
-                    function cleanupBlownText($target) {
-                        $target.removeClass('blown-wrap');
-                        $target.html($target.attr('data-text-was'));
-                        $target.removeAttr('style');
-                        $('.blown-text').remove();
-                        return;
-                    }
+
 
                     if ($target.hasClass('blown-wrap') && stepDist === 0) {
-                        return cleanupBlownText($target);
+                        return saucerEasterEgg.actions.cleanupBlownText($target);
                     }
 
                     $target.addClass('blown-wrap');
@@ -400,6 +389,18 @@
                     }
 
                     $target.html(htmlTmpl.join(''));
+                },
+                /**
+                 * reset text
+                 * @param {object} $target the jQuery element for the target text
+                 * @returns {undefined}
+                 */
+                cleanupBlownText: function ($target) {
+                    $target.removeClass('blown-wrap');
+                    $target.html($target.attr('data-text-was'));
+                    $target.removeAttr('style');
+                    $('.blown-text').remove();
+                    return;
                 },
                 /**
                  * laser w/ the laser css 
@@ -437,8 +438,8 @@
                  * @returns {undefined}
                  */
                 playSnd: function () {
-                    if(settings.snd){
-                    let aud = new Audio(settings.snd);
+                    if (settings.snd) {
+                        let aud = new Audio(settings.snd);
                         aud.play();
                     }
                 }
