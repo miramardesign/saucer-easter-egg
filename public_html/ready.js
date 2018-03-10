@@ -5,10 +5,11 @@
 $(document).ready(function () {
 
 // with data attibute data-saucer="#saucer-btn" in html
-    $('#saucer-target').flyingSaucerAttack();
+    $('.saucer-targets').flyingSaucerAttack();
+    $('.saucer-targets-both').flyingSaucerAttack();
     
     $('#saucer-target-center').flyingSaucerAttack({saucer: '#saucer-btn-center', 
-        label: '===== all your base are belong to us ============='});
+        LABEL: '===== all your base are belong to us ============='});
 
     $('#saucer-target-right').flyingSaucerAttack({saucer: '#saucer-btn-right',
         LABEL: '- - - - get rekt!!!:) - - - -',
