@@ -82,7 +82,7 @@
                     let left = Math.max(Math.abs(hDist) / 2, minH);
 
                     //todo make the saucer fly relative to target?
-                    return $saucer.attr('data-text-was', $saucer.text())
+                    return $saucer.data('text-was', $saucer.text())
                             .html('<marquee>' + settings.label + '</marquee>')
                             .animate({
                                 left: hDir + "=" + left,
@@ -140,7 +140,8 @@
             },
             utils: {
                 /**
-                 * promise based delay for animations
+                 * promise based delay for animations via css changes, (as opposed 
+                 * to $.animate which can return .promise() 
                  * @param {type} ms
                  * @returns {object} a promise
                  * http://jamesknelson.com/grokking-es6-promises-the-four-functions-you-need-to-avoid-callback-hell/
@@ -176,9 +177,9 @@
                     /* laser blast */
                     ${strongSaucerSelector}.laser::after {
                         background: linear-gradient(to right top, rgba(255, 255, 255, 0.03) 48%, 
-                            rgba(255, 255, 255, 0.46) 40%, rgba(255, 186, 178, 0.89) 50%,
-                            rgba(255, 48, 25, 0.95) 51%, 
-                            rgba(255, 186, 178, 1) 51%, 
+                            rgba(255, 255, 255, 0.46) 40%, rgba(255, 187, 179, 0.89) 50%,
+                            rgba(255, 48, 26, 0.95) 51%, 
+                            rgba(255, 187, 179, 1) 51%, 
                             rgba(255, 255, 255, 0.68) 54%,
                             rgba(255, 255, 255, 0.03) 50%) repeat scroll 0 0 rgba(0, 0, 0, 0);
                         border-radius: 12px; 
@@ -196,8 +197,6 @@
                         position: absolute;
                         width: 82px;
                         left: 20px;
-
-                        /* todo make same color as the button */
                         border-top: 1px solid rgb(208, 208, 208);
                     }
 
@@ -326,8 +325,8 @@
                     }
 
                     $saucer.removeAttr('style');
-                    $saucer.text($saucer.attr('data-text-was'));
-                    $target.html($target.attr('data-text-was')).removeAttr('style');
+                    $saucer.text($saucer.data('text-was'));
+                    $target.html($target.data('text-was')).removeAttr('style');
 
                     saucerEasterEgg.actions.blowupText(0, $target);
 
@@ -369,7 +368,7 @@
                     $target.addClass('blown-wrap');
 
                     const text = $.trim($target.text());
-                    $target.attr('data-text-was', text);
+                    $target.data('text-was', text);
                     let htmlTmpl = [];
                     let lenLenText = text.length;
                     let halfLenText = lenLenText / 2;
@@ -397,7 +396,7 @@
                  */
                 cleanupBlownText: function ($target) {
                     $target.removeClass('blown-wrap')
-                            .html($target.attr('data-text-was'))
+                            .html($target.data('text-was'))
                             .removeAttr('style');
                     $target.children('.blown-text').remove();
                     return;
