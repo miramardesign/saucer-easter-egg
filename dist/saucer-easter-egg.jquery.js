@@ -233,8 +233,7 @@
                     if ($saucer.first) {
                         $saucer = $saucer.first();
                     }
-                    console.log('saucer obj', $saucer);
-                    console.dir($saucer);
+
                     let idSaucer = $saucer.attr('id');
                     let classesSaucer = $saucer.attr('class').replace(/ /gi, '.');
                     if (!idSaucer) {
@@ -359,7 +358,6 @@
                  * @returns {undefined}
                  */
                 blowupText: function (stepDist, $target) {
-
 
                     if ($target.hasClass('blown-wrap') && stepDist === 0) {
                         return saucerEasterEgg.actions.cleanupBlownText($target);
