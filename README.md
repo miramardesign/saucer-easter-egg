@@ -1,10 +1,6 @@
 
-
-
-
 # saucer-easter-egg
 Flying Saucer Easter  Egg
-
 
 Click on a text element in the page, and then a designated button transforms into 
 a flying  saucer, flies over your target element zaps it with a laser, then 
