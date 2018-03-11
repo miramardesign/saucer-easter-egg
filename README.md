@@ -8,7 +8,7 @@ flies away. The page is then reset perfectly like nothing happened.
 
 Usage:
 
-![The Matrix has you...](https://s-media-cache-ak0.pinimg.com/originals/79/57/1b/79571b075b2d365d94f1972edb363b2d.jpg)
+![Blow it up!](https://i.imgur.com/2uR07V7.gif)
 
 ## Installation
 
