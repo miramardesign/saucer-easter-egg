@@ -1,7 +1,7 @@
 {
   "name": "saucer-easter-egg",
-  "version": "1.0.3",
-  "main": "path/to/main.css",
+  "version": "1.0.4",
+  "main": "dist/saucer-easter-egg.jquery.js",
   "ignore": [
     ".jshintrc",
     "**/*.txt"
