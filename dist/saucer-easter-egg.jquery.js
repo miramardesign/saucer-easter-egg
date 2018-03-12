@@ -128,7 +128,9 @@
                     let rand = Math.floor(Math.random() * 10);
                     let plusOrMinusRandom = rand % 2 === 0 ? '+' : '-';
                     let leftD = plusOrMinusRandom + "=2000";
-                    return $saucer.animate({
+                    return $saucer
+                            .css('position', 'relative')    //need for a tags and need to wait to fly away so it doesnt 
+                            .animate({
                         left: leftD,
                         top: plusOrMinusRandom + '=' + (rand * 200)},
                             settings.speed * 2
