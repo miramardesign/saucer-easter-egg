@@ -1,6 +1,6 @@
 /* global expect, jasmine */
 
-describe("Test flying saucer utils", function () {
+describe("Test flying saucer jquery plugin", function () {
 
     let saucerEasterEgg, $saucer, $target;
 
@@ -28,7 +28,6 @@ describe("Test flying saucer utils", function () {
                 <span id="saucer-target-right"  class="saucer-target" >target on no inner span</span>
             </div>`;
 
-
         jasmine.getFixtures().set(html);
 
         $target = $('#saucer-target-right');
@@ -45,7 +44,6 @@ describe("Test flying saucer utils", function () {
     });
 
     it("jasmine for jasmine-jquery is  defined", function () {
-
         expect(jasmine).toBeDefined();
     });
 
