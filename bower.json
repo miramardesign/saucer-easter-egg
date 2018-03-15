@@ -9,6 +9,7 @@
     "jquery": "^3.3.1"
   },
   "devDependencies": {
-        "bootstrap": "^4.0.0",
-    }
+    "bootstrap": "^4.0.0",
+    "jasmine-jquery": "^2.1.1"
+  }
 }

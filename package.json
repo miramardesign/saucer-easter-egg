@@ -19,6 +19,11 @@
     "jasmine-jquery": "^2.1.1",
     "karma": "^0.12.37",
     "karma-chrome-launcher": "^0.1.7",
-    "karma-jasmine": "^0.3.5"
+    "karma-jasmine": "^0.3.8"
+  },
+  "dependencies": {
+    "karma-jasmine-jquery": "^0.1.1",
+    "socket.io": "^2.0.4",
+    "socketio": "^1.0.0"
   }
 }
