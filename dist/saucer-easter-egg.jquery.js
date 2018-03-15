@@ -1,5 +1,5 @@
 'use strict';
-(function ($, Math, Date, window) {
+(function ($, Math, Date, window, global) {
 
     /**
      * flying saucer easter egg jQuery plugin.
@@ -52,7 +52,6 @@
                             return saucerEasterEgg
                                     .anims
                                     .flyAway($saucer);
-
                         })
                         .then(function () {
                             saucerEasterEgg
@@ -84,6 +83,10 @@
                     //todo make the saucer fly relative to target?
                     return $saucer.data('text-was', $saucer.text())
                             .html('<marquee>' + settings.label + '</marquee>')
+                            //need for a tags and need to wait to fly away so it doesnt 
+                            .css('position', 'relative')
+                            .css('display', 'inline-block')
+                            .css('width', $saucer.width()) //problem w/ width
                             .animate({
                                 left: hDir + "=" + left,
                                 top: "-=" + top,
@@ -129,12 +132,11 @@
                     let plusOrMinusRandom = rand % 2 === 0 ? '+' : '-';
                     let leftD = plusOrMinusRandom + "=2000";
                     return $saucer
-                            .css('position', 'relative')    //need for a tags and need to wait to fly away so it doesnt 
                             .animate({
-                        left: leftD,
-                        top: plusOrMinusRandom + '=' + (rand * 200)},
-                            settings.speed * 2
-                            )
+                                left: leftD,
+                                top: plusOrMinusRandom + '=' + (rand * 200)},
+                                    settings.speed * 2
+                                    )
                             .promise();
                 }
 
@@ -445,6 +447,15 @@
             }
         };
 
+
+        //FOR TESTING decide whether you want to expose your api or not 
+        if (opts.makeGlobal) {
+            //global.api = saucerEasterEgg;
+            console.log('making global for testing==============')
+            return  saucerEasterEgg;
+            ///return {saucerEasterEgg: saucerEasterEgg};
+        }
+
         /**
          * invoke on each jQuery matched set
          */
@@ -477,6 +488,6 @@
             });
         });
 
-        return this;
+//        return this;
     };
-}(jQuery, Math, Date, window));
+}(jQuery, Math, Date, window, this));

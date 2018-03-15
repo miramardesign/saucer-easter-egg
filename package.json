@@ -1,14 +1,24 @@
 {
-    "name": "saucer-easter-egg",
-    "version": "1.0.5",
-    "keywords": [
-        "util",
-        "functional",
-        "server",
-        "client",
-        "browser"
-    ],
-    "author": "miramardesign",
-    "contributors": [],
-
+  "name": "saucer-easter-egg",
+  "version": "1.0.5",
+  "keywords": [
+    "util",
+    "functional",
+    "server",
+    "client",
+    "browser"
+  ],
+  "author": "miramardesign",
+  "contributors": [],
+  "scripts": {
+    "test": "karma start karma.conf.js"
+  },
+  "devDependencies": {
+    "jasmine": "^3.1.0",
+    "jasmine-core": "^2.2.0",
+    "jasmine-jquery": "^2.1.1",
+    "karma": "^0.12.37",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-jasmine": "^0.3.5"
+  }
 }
