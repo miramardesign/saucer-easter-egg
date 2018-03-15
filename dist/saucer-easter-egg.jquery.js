@@ -449,11 +449,9 @@
 
 
         //FOR TESTING decide whether you want to expose your api or not 
-        if (opts.makeGlobal) {
-            //global.api = saucerEasterEgg;
-            console.log('making global for testing==============')
+        if (opts && opts.makeGlobal) {
+            console.log('making global for testing==============');
             return  saucerEasterEgg;
-            ///return {saucerEasterEgg: saucerEasterEgg};
         }
 
         /**
